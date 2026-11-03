@@ -14,6 +14,7 @@
   --s1:#2a78d6; --s2:#eb6834; --s3:#1baf7a; --s4:#eda100; --s5:#e87ba4; --s6:#008300;
   --hi:#2a78d6; --dim:#a9b6c8; --track:#dbe7f7;
   --h0:#e8eae5; --h1:#b7d3f6; --h2:#86b6ef; --h3:#3987e5; --h4:#1c5cab; --h5:#0d366b;
+  --t0:#14201f; --t1:#14201f; --t2:#14201f; --t3:#14201f; --t4:#ffffff; --t5:#ffffff;
   --tb-fs:80%; --tb-fl:78%; --tb-fld:68%; --tb-soon:#8a5300;
   --f-body:"Noto Sans JP","Hiragino Sans","Yu Gothic",system-ui,sans-serif;
   --f-disp:"Zen Maru Gothic","Hiragino Maru Gothic ProN","Noto Sans JP",system-ui,sans-serif;
@@ -29,7 +30,8 @@
     --focus:#5aa0f0; --ok:#3fcf3f; --bad:#ee7a7a;
     --s1:#3987e5; --s2:#d95926; --s3:#199e70; --s4:#c98500; --s5:#d55181; --s6:#008300;
     --hi:#3987e5; --dim:#4b5870; --track:#26364d;
-    --h0:#2c2c2a; --h1:#184f95; --h2:#256abf; --h3:#3987e5; --h4:#6da7ec; --h5:#b7d3f6;
+    --h0:#2c2c2a; --h1:#563b22; --h2:#804a19; --h3:#ab5911; --h4:#d56808; --h5:#ff7700;
+    --t0:#f1f4f0; --t1:#f1f4f0; --t2:#f1f4f0; --t3:#f1f4f0; --t4:#14201f; --t5:#14201f;
     --tb-fs:46%; --tb-fl:26%; --tb-fld:32%; --tb-soon:#f0c46c;
     color-scheme:dark;
   }
@@ -43,7 +45,8 @@
   --focus:#5aa0f0; --ok:#3fcf3f; --bad:#ee7a7a;
   --s1:#3987e5; --s2:#d95926; --s3:#199e70; --s4:#c98500; --s5:#d55181; --s6:#008300;
   --hi:#3987e5; --dim:#4b5870; --track:#26364d;
-  --h0:#2c2c2a; --h1:#184f95; --h2:#256abf; --h3:#3987e5; --h4:#6da7ec; --h5:#b7d3f6;
+  --h0:#2c2c2a; --h1:#563b22; --h2:#804a19; --h3:#ab5911; --h4:#d56808; --h5:#ff7700;
+    --t0:#f1f4f0; --t1:#f1f4f0; --t2:#f1f4f0; --t3:#f1f4f0; --t4:#14201f; --t5:#14201f;
   --tb-fs:46%; --tb-fl:26%; --tb-fld:32%; --tb-soon:#f0c46c;
   color-scheme:dark;
 }
@@ -130,9 +133,9 @@ textarea{min-height:72px;resize:vertical}
 .result p:first-of-type{margin-top:0;font-weight:700;font-size:15.5px}
 .heat{display:grid;grid-template-columns:3.2em repeat(7,minmax(0,42px));gap:4px;align-items:center;width:max-content;max-width:100%}
 .hl{font-size:11px;color:var(--muted);text-align:center}
-.hc{display:block;aspect-ratio:1;border-radius:6px;background:var(--h0)}
-.hc.fut{background:none}
-.hc.h1{background:var(--h1)}.hc.h2{background:var(--h2)}.hc.h3{background:var(--h3)}.hc.h4{background:var(--h4)}.hc.h5{background:var(--h5)}
+.hc{display:grid;place-items:center;aspect-ratio:1;border-radius:6px;background:var(--h0);color:var(--t0);font:500 10.5px/1 var(--f-num)}
+.hc.h1{background:var(--h1);color:var(--t1)}.hc.h2{background:var(--h2);color:var(--t2)}.hc.h3{background:var(--h3);color:var(--t3)}.hc.h4{background:var(--h4);color:var(--t4)}.hc.h5{background:var(--h5);color:var(--t5)}
+.hc.oth{opacity:.3}
 .hc.now{outline:2px solid var(--ink);outline-offset:1px}
 .legend{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;font-size:12px;color:var(--ink-2);margin-top:10px}
 .legend .sw{display:inline-flex;gap:3px;align-items:center}
@@ -462,6 +465,10 @@ th{font-weight:500;color:var(--ink-2)}
 .mgrow .rtn{display:flex;align-items:center;gap:8px}
 .mgrow i{width:10px;height:10px;border-radius:50%;display:block;flex:none}
 @media(prefers-reduced-motion:reduce){.cardbtn.blink::after{animation:none;opacity:.18}.fadein{animation:none}}
+.chip.claim{position:relative;overflow:hidden;font-weight:700;border-color:var(--ink)}
+.chip.claim::after{content:"";position:absolute;inset:0;background:var(--ink);opacity:0;pointer-events:none;animation:blink 2s ease-in-out infinite}
+@media(prefers-reduced-motion:reduce){.chip.claim::after{animation:none;opacity:.18}}
+.card>.stk:first-child{margin-top:0;padding-top:0;border-top:0}
 </style>
 
 <script>
@@ -469,7 +476,8 @@ th{font-weight:500;color:var(--ink-2)}
    manabilog-game.js v2 ― まなびログ「ごほうび」(タスク完了+強化+アセンション+プレステージ)
    --------------------------------------------------------------------
    1回あたりのポイント =
-       (10 + 加算) × 強化1の倍率 × 強化2の倍率 × … × 強化10の倍率 × プレステージ倍率 ^ プレステージ乗数
+       (10 + 加算) × 強化1の倍率 × 強化2の倍率 × … × 強化10の倍率 × プレステージ倍率 ^ プレステージ乗数 × 連続バフ
+   ・連続バフ … 「分析」の連続日数(3・7・14・30・60・100日)を達成してタップすると、その日数と同じ%が永続で加わる(3種類の連続ぶん)
 
    ・タスクを完了する … 上の式のポイントがもらえる(最初は10)
    ・強化(1〜10)  … 最初のコストは 10^n。Lv0→Lv1にすると「加算」が 10^n 増える(以降ずっと)
@@ -494,11 +502,12 @@ const BASE_PTS=10, CAP0=10, CAP_STEP=10, MULT_STEP=0.20, G0=1.10, G_STEP=0.10;
 const PRE_MIN=1e5, LOG_MAX=20, AWARDED_MAX=3000, SESSION_MIN=5, SESSION_MAX_PRESS=12;
 const FAC=[['えんぴつ','✏️'],['ノート','📓'],['学習机','🪑'],['電気スタンド','💡'],['参考書','📚'],
            ['自習室','🏫'],['家庭教師','🧑‍🏫'],['塾','🏢'],['図書館','🏛️'],['大学','🎓']].map((a,i)=>({n:i+1,name:a[0],icon:a[1]}));
+const BUFF_RE=/^(study|goal|eff):(3|7|14|30|60|100)$/;
 const p10=n=>Math.pow(10,n);
 const r2=x=>Math.round(x*100)/100;
 const freshFac=i=>({lv:0,asc:0,m:1,base:p10(i+1)*G0,g:G0});
 function blank(){
-  return {v:3,points:0,total:0,prestiges:0,presses:0,pm:1,pe:0,fac:FAC.map((f,i)=>freshFac(i)),awarded:[],sessions:[],log:[]};
+  return {v:3,points:0,total:0,prestiges:0,presses:0,pm:1,pe:0,fac:FAC.map((f,i)=>freshFac(i)),awarded:[],sessions:[],log:[],bf:[]};
 }
 function num(x,d){x=Number(x);return Number.isFinite(x)&&x>=0?x:d;}
 function norm(o){
@@ -512,6 +521,7 @@ function norm(o){
     const a=Math.floor(num(x.asc,0)), c=CAP0+CAP_STEP*a;
     b.fac[i]={lv:Math.min(c,Math.floor(num(x.lv,0))),asc:a,m:Math.max(1,num(x.m,1)),base:Math.max(1,num(x.base,b.fac[i].base)),g:Math.max(G0,num(x.g,G0))};
   });
+  b.bf=Array.isArray(o.bf)?[...new Set(o.bf.filter(x=>typeof x==='string'&&BUFF_RE.test(x)))]:[];
   b.awarded=Array.isArray(o.awarded)?o.awarded.filter(x=>typeof x==='string').slice(-AWARDED_MAX):[];
   b.sessions=Array.isArray(o.sessions)?o.sessions.filter(x=>typeof x==='string').slice(-AWARDED_MAX):[];
   b.log=Array.isArray(o.log)?o.log.filter(x=>x&&typeof x.t==='string').slice(-LOG_MAX).map(x=>({t:x.t.slice(0,80),d:Number(x.d)||0,at:Number(x.at)||0})):[];
@@ -552,7 +562,16 @@ const flatOf=i=>{const f=G.fac[i]; return f.lv>=1?p10(i+1)*(1+f.asc):0;};
 const flatSum=()=>FAC.reduce((t,_,i)=>t+flatOf(i),0);
 const multProd=()=>G.fac.reduce((t,f)=>t*f.m,1);
 const preFactor=()=>G.pe>0?Math.pow(G.pm,G.pe):1;
-const pressValue=()=>Math.max(1,Math.round((BASE_PTS+flatSum())*multProd()*preFactor()));
+/* 連続バフ: 「分析」の連続日数タブ(3・7・14…日)を達成してタップすると、その日数と同じ%ぶん、1回あたりのポイントが永続的に増える(プレステージでも残る) */
+const buffFactor=()=>1+G.bf.reduce((t,id)=>t+Number(id.split(':')[1])/100,0);
+const hasBuff=id=>G.bf.includes(id);
+function claimBuff(id){
+  if(!BUFF_RE.test(id)||G.bf.includes(id)) return null;
+  const pct=Number(id.split(':')[1]);
+  G.bf.push(id); pushLog('連続バフ +'+pct+'%',0);
+  emit({type:'buff'}); return {pct:pct,factor:buffFactor()};
+}
+const pressValue=()=>Math.max(1,Math.round((BASE_PTS+flatSum())*multProd()*preFactor()*buffFactor()));
 function gain(pts){G.points+=pts; G.total+=pts;}
 
 /* ---------- 操作 ---------- */
@@ -678,7 +697,7 @@ function h(tag,attrs){
 const box=(label,val)=>h('div',{class:'b'},h('span',{text:label}),h('b',{text:val}));
 let armPre=false, armTimer=0;
 function draw(boxEl){
-  const flat=flatSum(), mult=multProd(), pre=preFactor(), val=pressValue();
+  const flat=flatSum(), mult=multProd(), pre=preFactor(), bf=buffFactor(), val=pressValue();
 
   const hero=h('div',{class:'mg-card wide'},
     h('h2',{text:'ごほうびポイント'}),
@@ -692,8 +711,9 @@ function draw(boxEl){
     h('div',{class:'mg-fm'},
       h('span',{class:'op',text:'('}),box('基礎','10'),h('span',{class:'op',text:'+'}),box('加算','+'+fmt(flat)),h('span',{class:'op',text:')'}),
       h('span',{class:'op',text:'×'}),box('強化の倍率(全部)','×'+fx(mult)),
-      h('span',{class:'op',text:'×'}),box('プレステージ','×'+fx(pre))),
-    h('p',{class:'mg-sub',text:'= (10 + '+fmt(flat)+') × '+fx(mult)+' × '+fx(G.pm)+'^'+fx(G.pe)+' = '+fmt(val)+'pt'}));
+      h('span',{class:'op',text:'×'}),box('プレステージ','×'+fx(pre)),
+      h('span',{class:'op',text:'×'}),box('連続バフ','×'+fx(bf))),
+    h('p',{class:'mg-sub',text:'= (10 + '+fmt(flat)+') × '+fx(mult)+' × '+fx(G.pm)+'^'+fx(G.pe)+' × '+fx(bf)+' = '+fmt(val)+'pt'}));
 
   const rows=FAC.map((F,i)=>{
     const f=G.fac[i], c=capOf(f), atCap=f.lv>=c, cost=costOf(i), can=!atCap&&G.points>=cost;
@@ -752,14 +772,16 @@ function exportData(){return JSON.parse(JSON.stringify(G));}
 function importData(o){
   const n=norm(o); if(!n) return;
   const aw=[...new Set(G.awarded.concat(n.awarded))].slice(-AWARDED_MAX), ss=[...new Set(G.sessions.concat(n.sessions))].slice(-AWARDED_MAX);
+  const bfAll=[...new Set(G.bf.concat(n.bf))];
   if(n.total>G.total||(n.total===G.total&&n.prestiges>G.prestiges)) G=n;
-  G.awarded=aw; G.sessions=ss;
+  G.awarded=aw; G.sessions=ss; G.bf=bfAll;
   emit({type:'import'});
 }
 function reset(){G=blank();emit({type:'reset'});}
 
 global.ManabiGame={
   awardItems:awardItems,awardSession:awardSession,render:render,fmt:fmt,
+  hasBuff:hasBuff,claimBuff:claimBuff,getBuffFactor:buffFactor,
   getPoints:()=>G.points,getStars:()=>G.prestiges,getTotal:()=>G.total,
   onChange:fn=>{if(typeof fn==='function') listeners.push(fn);},
   exportData:exportData,importData:importData,reset:reset,
@@ -886,9 +908,9 @@ const S={
   sessions:Array.isArray(stored.sessions)?stored.sessions:[],
   goalMin:stored.goalMin>0?stored.goalMin:120,
   timer:Object.assign(defaultTimer(),stored.timer||{}),
-  units:stored.units||{},limitAlert:stored.limitAlert!==false,wdAll:false,rec:null,
+  units:stored.units||{},limitAlert:stored.limitAlert!==false,rec:null,
   sample:false, storageOk:true,
-  tab:'timer', range:14, finishing:null, lastResult:null, logLimit:40, exportText:'', tagEdit:null
+  tab:'timer', range:7, finishing:null, lastResult:null, logLimit:40, exportText:'', tagEdit:null
 };
 S.timer.mode='up';
 function saveStore(){
@@ -2420,31 +2442,38 @@ function openManage(){
 }
 
 
+/* ヒートマップの段階: 0分=h0、1日の目標の1.5倍=h5(最終段階)。その間を6色で均等に分ける */
+function heatLevel(min){
+  if(!(min>0)) return 0;
+  const top=S.goalMin*1.5;
+  return Math.max(1,Math.min(5,Math.round(min/top*5)));
+}
 function heatCard(){
   const dm=dayMap(S.sessions), today0=startOfDay(Date.now());
-  const dow=(new Date(today0).getDay()+6)%7, start=addDays(today0,-dow-28);
+  const nd=new Date(today0), mo=nd.getMonth();
+  const first=new Date(nd.getFullYear(),mo,1).getTime(), last=new Date(nd.getFullYear(),mo+1,0).getTime();
+  const start=addDays(first,-((new Date(first).getDay()+6)%7));      /* 今月1日をふくむ週の月曜日 = いちばん上の段 */
+  const weeks=Math.ceil((Math.round((last-start)/DAY)+1)/7);
   const names=['月','火','水','木','金','土','日'];
-  const grid=h('div',{class:'heat',role:'group','aria-label':'直近5週間の学習時間'});
+  const grid=h('div',{class:'heat',role:'group','aria-label':(mo+1)+'月の学習時間'});
   grid.append(h('span',{class:'hl'}),...names.map(n=>h('span',{class:'hl',text:n})));
-  for(let wk=0;wk<5;wk++){
+  for(let wk=0;wk<weeks;wk++){
     const wd=new Date(addDays(start,wk*7));
     grid.append(h('span',{class:'hl hwl',text:(wd.getMonth()+1)+'/'+wd.getDate()}));
     for(let c=0;c<7;c++){
-      const ms=addDays(start,wk*7+c);
-      if(ms>today0){grid.append(h('span',{class:'hc fut'}));continue;}
-      const o=dm.get(dkey(ms)), min=o?o.min:0, lv=min<=0?0:Math.min(5,Math.ceil(min/30));
-      const cell=h('span',{class:'hc h'+lv+(ms===today0?' now':''),tabindex:'0',role:'img','aria-label':dateLong(ms)+' '+fmtMin(min)});
-      attachTip(cell,()=>({title:dateLong(ms),rows:[{label:'学習時間',value:fmtMin(min)}]}));
+      const ms=addDays(start,wk*7+c), d=new Date(ms), inMonth=d.getMonth()===mo, fut=ms>today0;
+      const o=dm.get(dkey(ms)), min=o?o.min:0, lv=heatLevel(min);
+      const cell=h('span',{class:'hc h'+lv+(ms===today0?' now':'')+(inMonth?'':' oth'),tabindex:'0',role:'img','aria-label':dateLong(ms)+' '+(fut?'まだ記録なし':fmtMin(min)),text:String(d.getDate())});
+      attachTip(cell,()=>({title:dateLong(ms),rows:[{label:'学習時間',value:fut?'—':fmtMin(min)}]}));
       grid.append(cell);
     }
   }
-  return h('div',{class:'card'},h('h2',{text:'この5週間'}),
-    h('p',{class:'sub',text:'1マスが1日。上が古い週、下がいまの週です。左の日付は、その週の月曜日です。'}),grid,
-    h('div',{class:'legend'},h('span',{text:'少ない'}),h('span',{class:'sw'},[0,1,2,3,4,5].map(i=>h('i',{style:'background:var(--h'+i+')'}))),h('span',{text:'多い(30分ごとに1段階)'})));
+  return h('div',{class:'card'},h('div',{class:'chead'},h('h2',{text:'カレンダー'}),h('span',{class:'cnt',text:(mo+1)+'月'})),grid,
+    h('div',{class:'legend'},h('span',{text:'少ない'}),h('span',{class:'sw'},[0,1,2,3,4,5].map(i=>h('i',{style:'background:var(--h'+i+')'}))),h('span',{text:'多い(1日の目標の1.5倍で最も濃く)'})));
 }
 
 /* ---------- テスト分析(きろくタブ) ---------- */
-const TA={open:null,sel:'',win:14,form:null,card:null,charts:[]};
+const TA={open:null,sel:'',win:14,form:null,card:null,charts:[],show:false,redraw:null};
 const taBlank=()=>({id:'',name:'',date:dkey(Date.now()),subject:'',score:'',full:'100',avg:'',dev:''});
 const taNum=n=>String(Math.round(n*10)/10);
 const taSd=d=>Math.abs(d)<0.05?'±0':(d>0?'+':'−')+taNum(Math.abs(d));
@@ -2746,7 +2775,7 @@ function taCard(){
     h('summary',{text:ed?'テスト結果を直す':'テスト結果を入れる'}),h('div',{},taForm()));
   det.addEventListener('toggle',()=>{TA.open=det.open;});
   const card=h('div',{class:'card'},
-    h('h2',{text:'テスト分析'}),
+    h('div',{class:'chead'},h('h2',{text:'テスト分析'}),h('button',{type:'button',class:'linkbtn',on:{click:()=>{TA.show=false;if(TA.redraw)TA.redraw();}}},'とじる')),
     h('p',{class:'sub',text:'テストが終わった教科の「テストの名前・点数・平均点・偏差値」を入れると、教科ごとの比べ方や、勉強時間との関係がわかります。'}),
     taDue(),det,body);
   TA.card=card;
@@ -2860,7 +2889,13 @@ function renderLog(){
       h('div',{},pasteBox,h('div',{class:'btns'},h('button',{type:'button',class:'btn sm',on:{click:()=>{importData(pasteBox.value);}}},'読み込む')))),
     h('div',{style:'margin-top:14px'},wipe));
 
-  root.append(h('div',{class:'sgrid'},h('div',{class:'card'},h('h2',{text:'記録を足す'}),manual),taCard(),list,backup));
+  const taBox=h('div');
+  const drawTa=()=>{
+    if(TA.show){taBox.replaceChildren(taCard());requestAnimationFrame(taDrawAll);}
+    else{TA.card=null;taBox.replaceChildren(h('button',{type:'button',class:'btn',style:'width:100%','aria-expanded':'false',on:{click:()=>{TA.show=true;drawTa();}}},'テスト分析を開く'));}
+  };
+  TA.redraw=drawTa; drawTa();
+  root.append(h('div',{class:'sgrid'},h('div',{class:'card'},h('h2',{text:'記録を足す'}),manual),taBox,list,backup));
   requestAnimationFrame(taDrawAll);
 }
 
@@ -2950,7 +2985,7 @@ function drawAll(){
   CH.forEach(c=>{const b=c[0];if(b.isConnected&&b.clientWidth>0&&b._w!==b.clientWidth){b._w=b.clientWidth;c[1](b);}});
 }
 function xLabels(svg,n,xf,from,y){
-  const step=n<=7?1:n<=14?2:5;
+  const step=Math.max(1,Math.ceil(n/7));
   for(let i=0;i<n;i++){
     if((n-1-i)%step!==0) continue;
     const d=new Date(addDays(from,i));
@@ -2978,7 +3013,7 @@ function drawDaily(box,days,goal,from){
       s('text',{x:m.l-7,y:y(v)+4,'text-anchor':'end',class:'tick',text:String(v)}));
   }
   svg.append(s('text',{x:m.l-7,y:m.t-8,'text-anchor':'end',class:'tick',text:'分'}));
-  const slot=iw/n,bw=Math.min(24,Math.max(6,slot*.62));
+  const slot=iw/n,bw=Math.min(24,Math.max(1.5,slot*.62));
   days.forEach((d,i)=>{
     const cx=m.l+slot*(i+.5);
     const band=s('rect',{x:m.l+slot*i,y:m.t,width:slot,height:ih,class:'band'});
@@ -3127,28 +3162,27 @@ function makeInsights(R,E,LB,TB,from,today0){
    分析の拡張: ストリーク / 曜日別 / 集中度ギャップ / 限界時間 / おすすめ
    ==================================================================== */
 const DOW_ORDER=[1,2,3,4,5,6,0];
-function xScope(){
-  const today0=startOfDay(Date.now()), all=withEff(S.sessions);
-  if(S.wdAll){
-    const first=all.length?Math.min(...all.map(x=>x.start)):today0;
-    return {list:all,from:startOfDay(first),today0:today0};
+const RANGES=[{k:7,label:'1週間',cap:'この1週間'},{k:30,label:'一ヶ月',cap:'この一ヶ月'},{k:'all',label:'全期間',cap:'全期間'}];
+function rangeInfo(){
+  const today0=startOfDay(Date.now());
+  if(S.range==='all'){
+    const first=S.sessions.length?Math.min(...S.sessions.map(x=>x.start)):today0;
+    const from=startOfDay(Math.min(first,today0));
+    return {from:from,today0:today0,N:Math.max(1,Math.round((today0-from)/DAY)+1)};
   }
-  const from=addDays(today0,-(S.range-1));
-  return {list:all.filter(x=>x.start>=from&&x.start<addDays(today0,1)),from:from,today0:today0};
+  const N=S.range;
+  return {from:addDays(today0,-(N-1)),today0:today0,N:N};
 }
-function scopeSeg(){
-  return h('div',{class:'seg',role:'group','aria-label':'分析の対象'},
-    h('button',{type:'button','aria-pressed':String(!S.wdAll),on:{click:()=>{S.wdAll=false;renderStats();}}},'直近'+S.range+'日'),
-    h('button',{type:'button','aria-pressed':String(!!S.wdAll),on:{click:()=>{S.wdAll=true;renderStats();}}},'全期間'));
+function xScope(){
+  const ri=rangeInfo(), all=withEff(S.sessions);
+  return {list:all.filter(x=>x.start>=ri.from&&x.start<addDays(ri.today0,1)),from:ri.from,today0:ri.today0};
 }
-function xHead(title){
-  return h('div',{style:'display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:12px'},
-    h('h2',{text:title,style:'margin:0'}),scopeSeg());
-}
+function xHead(title){return h('h2',{text:title});}
 function insList(arr){
   return h('ul',{class:'ins'},arr.map(i=>h('li',{},h('span',{class:'tag',text:i.tag}),h('span',{text:i.text}))));
 }
 
+const STREAK_MS=[3,7,14,30,60,100];
 function dayTable(){
   const all=withEff(S.sessions), dm=dayMap(all), keys=[...dm.keys()].sort();
   if(!keys.length) return [];
@@ -3177,28 +3211,31 @@ function streakStats(days,pred){
 }
 function streakCard(){
   const days=dayTable();
-  const card=h('div',{class:'card'},h('h2',{text:'連続とたてなおし'}),
-    h('p',{class:'sub',text:'続けた日数と、できなかった日からどれくらいで戻れたかです。'}));
+  const card=h('div',{class:'card'});
   if(days.length<2){card.append(h('p',{class:'empty',text:'2日分以上の記録がたまると、ここに出ます。'}));return card;}
   const kinds=[
-    {name:'勉強した日',p:d=>d.total>0},
-    {name:'目標時間を超えた日(1日'+S.goalMin+'分)',p:d=>d.total>=S.goalMin},
-    {name:'効率指数が100以上の日',p:d=>d.eff!=null&&d.eff>=100}
+    {id:'study',name:'勉強した日',p:d=>d.total>0},
+    {id:'goal',name:'目標時間を超えた日(1日'+S.goalMin+'分)',p:d=>d.total>=S.goalMin},
+    {id:'eff',name:'効率指数が100以上の日',p:d=>d.eff!=null&&d.eff>=100}
   ];
-  const MS=[3,7,14,30,60,100];
   kinds.forEach(k=>{
-    const r=streakStats(days,k.p), next=MS.find(m=>m>r.cur);
-    const parts=['いまの連続 '+r.cur+'日(最長 '+r.best+'日)。'];
-    if(next) parts.push('あと'+(next-r.cur)+'日で'+next+'日連続です。');
-    parts.push(r.gapN?'つまずいてから戻るまで、平均 '+fmtNum(r.gapAvg)+'日('+r.gapN+'回)。':'つまずいたあとに戻った記録は、まだありません。');
-    if(r.away>0) parts.push('いま'+r.away+'日あいています。');
+    const r=streakStats(days,k.p), next=STREAK_MS.find(m=>m>r.cur);
     card.append(h('div',{class:'stk'},
       h('div',{class:'stk-h'},h('b',{text:k.name}),h('span',{class:'stk-n'},String(r.cur),h('small',{text:'日連続'}))),
       next?h('div',{class:'meter'},h('i',{style:'width:'+Math.min(100,r.cur/next*100)+'%'})):null,
-      h('p',{class:'note',style:'margin-top:8px',text:parts.join('')}),
-      h('div',{class:'chips',style:'margin-top:8px'},MS.map(m=>h('span',{class:'chip'+(r.best>=m?' on':''),text:m+'日'+(r.best>=m?' ✓':'')})))));
+      h('div',{class:'chips',style:'margin-top:8px'},STREAK_MS.map(m=>{
+        const id=k.id+':'+m, got=r.best>=m;
+        if(S.sample) return h('span',{class:'chip'+(got?' on':''),text:m+'日'+(got?' ✓':'')});
+        const claimed=ManabiGame.hasBuff(id);
+        if(got&&!claimed) return h('button',{type:'button',class:'chip claim','aria-label':k.name+' '+m+'日連続を達成。タップしてポイントバフ +'+m+'%をもらう',on:{click:()=>{
+          const g=ManabiGame.claimBuff(id);
+          if(!g) return;
+          toast('ポイントバフ +'+g.pct+'% をもらいました(合計 ×'+(Math.round(g.factor*100)/100)+')');
+          card.replaceWith(streakCard());
+        }}},m+'日');
+        return h('span',{class:'chip'+(claimed?' on':''),text:m+'日'+(claimed?' ✓':'')});
+      }))));
   });
-  card.append(h('p',{class:'note',style:'margin-top:14px',text:'効率指数が100以上の日は、量を入れた記録がある日だけが対象です。'}));
   return card;
 }
 
@@ -3380,7 +3417,7 @@ function checkLimit(){
 
 function renderStats(){
   const root=$('#p-stats'); CH.length=0; root.replaceChildren();
-  const ALL=withEff(S.sessions), N=S.range, today0=startOfDay(Date.now()), from=addDays(today0,-(N-1));
+  const ALL=withEff(S.sessions), RI=rangeInfo(), N=RI.N, today0=RI.today0, from=RI.from;
   const R=ALL.filter(x=>x.start>=from&&x.start<addDays(today0,1));
   const dm=dayMap(R);
   const days=[];
@@ -3389,7 +3426,7 @@ function renderStats(){
     days.push({ms:ms,total:o?o.min:0,by:o?o.by:{},eff:E.length?wavg(E):null});
   }
   const filter=h('div',{class:'filter'},
-    h('div',{class:'seg',role:'group','aria-label':'期間'},[7,14,30].map(n=>h('button',{type:'button','aria-pressed':String(S.range===n),on:{click:()=>{S.range=n;renderStats();}}},'直近'+n+'日'))),
+    h('div',{class:'seg',role:'group','aria-label':'期間'},RANGES.map(r=>h('button',{type:'button','aria-pressed':String(S.range===r.k),on:{click:()=>{S.range=r.k;renderStats();}}},r.label))),
     h('span',{class:'lab',text:S.sample?'サンプルデータ':'いまの目標 '+S.goalMin+'分/日'}));
   root.append(filter);
 
@@ -3403,7 +3440,7 @@ function renderStats(){
   const hh=Math.floor(total/60),mm=Math.round(total%60);
   const tile=(a,b,u)=>h('div',{class:'tile'},h('div',{class:'a',text:a}),h('div',{class:'b'},b,u?h('small',{text:u}):null));
   const hero=h('div',{class:'card hero'},
-    h('div',{class:'cap',text:'この'+N+'日間の学習時間'}),
+    h('div',{class:'cap',text:RANGES.find(r=>r.k===S.range).cap+'の学習時間'}),
     h('div',{class:'big'},hh>0?[String(hh),h('small',{text:'時間'})]:null,String(mm),h('small',{text:'分'})),
     h('div',{class:'tiles'},
       tile('勉強した日',studied+' / '+N,'日'),
@@ -3423,9 +3460,7 @@ function renderStats(){
   const table=h('details',{class:'tv'},h('summary',{text:'表で見る'}),h('div',{class:'tscroll'},
     h('table',{},h('thead',{},h('tr',{},h('th',{text:'日付'}),present.map(sj=>h('th',{text:tl(sj)})),h('th',{text:'合計'}))),
       h('tbody',{},days.slice().reverse().map(d=>h('tr',{},h('td',{text:dateLong(d.ms)}),present.map(sj=>h('td',{text:d.by[sj.id]?fmtMin(d.by[sj.id]):'–'})),h('td',{text:d.total?fmtMin(d.total):'–'})))))));
-  const daily=h('div',{class:'card'},h('h2',{text:'毎日の学習時間'}),
-    h('p',{class:'sub',text:'タスクタグごとの積み上げです。横線は1日の目標。'}),
-    h('div',{class:'leg'},present.map(sj=>h('span',{},h('i',{style:'background:'+sj.c}),tl(sj)))),dbox,table);
+  const daily=h('div',{class:'card'},dbox,table);
 
   const maxMin=Math.max(...SUBJECTS.map(sj=>sum(R.filter(x=>x.subject===sj.id),x=>x.min)));
   const share=h('ul',{class:'share'},SUBJECTS.map(sj=>{
