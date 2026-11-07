@@ -2369,21 +2369,21 @@ function selectTask(id,memo){
 let tapT=0, tapTimer=0;
 function barTap(){
   const now=Date.now();
-  if(now-tapT<350){clearTimeout(tapTimer);tapT=0;openFinish();return;}   /* ダブルタップ=終了して記録 */
+  if(now-tapT<350){clearTimeout(tapTimer);tapT=0;backFromTimer();return;}   /* ダブルタップ=計測を捨ててもどる */
   tapT=now; clearTimeout(tapTimer);
-  tapTimer=setTimeout(()=>{tapT=0;backFromTimer();},330);                /* 1回タップ=計測を捨ててもどる */
+  tapTimer=setTimeout(()=>{tapT=0;openFinish();},330);                      /* 1回タップ=終わって記録 */
 }
 function viewTimer(){
   const t=S.timer, tg=tagOf(t.subject), info=todayInfo();
   const label=String(tg.subj||tg.name), tname=normName(tg.name)===normName(label)?'':tg.name;
   T.limit=limitFor(label);
-  const bar=subjBar(label,tname,tg.c,info.reg.has(t.subject)?'col':'plain',barTap,label+' '+tg.name+'。1回タップで計測を捨ててもどる、2回タップで終わって記録します');
+  const bar=subjBar(label,tname,tg.c,info.reg.has(t.subject)?'col':'plain',barTap,label+' '+tg.name+'。1回タップで終わって記録、2回タップで計測を捨ててもどります');
   T.digits=h('div',{class:'elapsed',role:'timer','aria-label':'経過時間'});
   T.state=h('div',{class:'estate'});
   T.alert=h('div',{class:'alertbox',role:'status','aria-live':'polite',hidden:true});
   const kids=[bar,T.digits,T.state,T.alert,
     goalBar(true),
-    h('p',{class:'hint',text:'教科の欄を 1回タップ=計測を捨ててもどる / 2回タップ(ダブルタップ)=終わって記録'})];
+    h('p',{class:'hint',text:'教科の欄を 1回タップ=終わって記録 / 2回タップ(ダブルタップ)=計測を捨ててもどる'})];
   if(t.status==='paused') kids.push(h('div',{class:'btns',style:'margin-top:0'},h('button',{type:'button',class:'btn pri',on:{click:startTimer}},'再開')));
   return h('div',{class:'tview fadein'},kids);
 }
