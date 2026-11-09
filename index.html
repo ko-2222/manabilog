@@ -472,6 +472,425 @@ th{font-weight:500;color:var(--ink-2)}
 </style>
 
 <script>
+/* ====== i18n (日本語/English) ====== */
+(function(g){
+'use strict';
+var LK='manabilog.lang', lang='ja', saved=false;
+try{var v=localStorage.getItem(LK); if(v==='en'||v==='ja'){lang=v;saved=true;}}catch(e){}
+var JP=/[　-ヿ㐀-鿿＀-￯]/;
+/* F: [ja,en] 断片辞書(完全一致+最長一致) */
+var F=[
+['まなびログ','Manabi Log'],
+['ごほうびを見る','View rewards'],['メニュー','Menu'],
+['タイマー','Timer'],['タスクタグ','Task tags'],['タスク','Tasks'],['きろく','Log'],['ぶんせき','Stats'],['ごほうび','Rewards'],
+['ページ',' pages'],
+['漢字ドリル','Kanji drills'],['国語','Japanese'],['古典 文法','Classical grammar'],['計算ドリル','Math drills'],['数学','Math'],['単語帳','Vocab book'],['英語','English'],['理科ワーク','Science workbook'],['理科','Science'],['社会ワーク','Social studies workbook'],['社会','Social studies'],['その他','Other'],
+['漢文ノート','Kanbun notes'],['章末問題','End-of-chapter problems'],['第3章','Ch. 3'],['第4章','Ch. 4'],['文法ワーク','Grammar workbook'],
+['(消したタグ)','(deleted tag)'],['・',' · '],
+['15分まで','Up to 15 min'],['15〜30分','15–30 min'],['30〜45分','30–45 min'],['45〜60分','45–60 min'],['60〜90分','60–90 min'],['90分以上','90+ min'],
+['朝(5〜9時)','Early (5–9h)'],['午前(9〜12時)','Morning (9–12h)'],['午後(12〜17時)','Afternoon (12–17h)'],['夕方(17〜20時)','Evening (17–20h)'],['夜(20〜24時)','Night (20–24h)'],['深夜(0〜5時)','Late night (0–5h)'],
+['完了','Done'],['今日まで','Due today'],['明日まで','Due tomorrow'],
+['例: 8〜13 と入力すると 8, 9, 10, 11, 12, 13 の6項目ができます。','Example: typing 8–13 creates 6 items: 8, 9, 10, 11, 12, 13.'],
+['項目','items'],['・200個まで',' · up to 200'],
+['共有できるデータがまだありません。','There is no data to share yet.'],
+['【テスト進捗ボード】共有データ','[Test progress board] shared data'],
+['アプリの「タスク」→「テスト進捗」→「共有」の取り込み欄に、この文章をそのまま貼り付けてください。','Paste this text as-is into the import box under Tasks → Test progress → Share in the app.'],
+['（期限 ',' (due '],['）',')'],['（',' ('],['　・','  • '],
+['共有データが見つかりません。「TPB1:」で始まる行まで含めて貼り付けてください。','No shared data found. Paste it including the line that starts with "TPB1:".'],
+['選ばない','None'],['テスト進捗にも反映する','Also update test progress'],
+['タスク(なくてもOK)','Task (optional)'],['番号で選ぶ 例: 8〜10','Pick by number, e.g. 8–10'],['番号で選ぶ','Pick by number'],
+['番号を入れてください(例: 8〜10)','Enter numbers (e.g. 8–10)'],['当てはまる未完了の項目がありません','No matching unfinished items'],
+['やった確認項目','Items you did'],['確認項目','Checklist items'],['(済)',' (done)'],['やった項目をタップしてください。','Tap the items you did.'],
+['閉じる','Close'],['いまのタイマーを終えてから選んでください','Finish the current timer before choosing'],
+['記録から自動で完了になっています','Already marked done from your records'],['チェックしました。+','Checked. +'],
+['今日やること','Today\'s tasks'],['曜日ごとの「毎日のタスク」を決めると、今日やることがここに出ます。','Set daily tasks for each weekday and today\'s tasks will show up here.'],
+['毎日のタスクをつくる','Create a daily task'],
+['左の○をタップすると、勉強を記録しなくてもチェックできます(ポイントももらえます)。行をタップすると、そのタスクのタイマーが始まります。','Tap the circle on the left to check it off without logging study (you still earn points). Tap a row to start that task\'s timer.'],
+['曜日を1つ以上選んでください','Choose at least one weekday'],['時間の目標は0〜600分で入れてください','Enter a time goal between 0 and 600 minutes'],
+['毎日のタスクは40個までです','You can have up to 40 daily tasks'],['保存しました','Saved'],['毎日のタスクをつくりました','Daily task created'],['削除しました','Deleted'],
+['もう一度押すと削除','Press again to delete'],['このタスクを削除','Delete this task'],['タスクタグ(教科ごと)','Task tag (by subject)'],
+['メモ(なくてもOK)','Memo (optional)'],['例:第3回まで、復習','e.g. up to lesson 3, review'],['やる曜日','Days'],['毎日','Every day'],['平日','Weekdays'],['土日','Weekends'],['クリア','Clear'],
+['時間の目標(分・なくてもOK)','Time goal (min, optional)'],['例:30','e.g. 30'],['保存する','Save'],['つくる','Create'],
+['毎日のタスクを変える','Edit daily task'],['新しい毎日のタスク','New daily task'],['【毎日のタスク】共有データ','[Daily tasks] shared data'],
+['アプリの「タスク」→「今日と毎日」→「⋯」の取り込み欄に、この文章をそのまま貼り付けてください。','Paste this text as-is into the import box under Tasks → Today & daily → ⋯ in the app.'],
+['曜日: ',': '],['なし','none'],
+['共有データが見つかりません。「RTP1:」で始まる行まで含めて貼り付けてください。','No shared data found. Paste it including the line that starts with "RTP1:".'],
+['共有用の文章','Text to share'],['共有された文章を貼り付け','Paste shared text'],['共有できるデータがありません','There is no data to share'],
+['選択しました。コピーして使ってください','Selected. Copy it to use.'],['コピーしました。貼り付けて送れます','Copied. Paste it to send.'],
+['取り込める共有データが見つかりません','No importable shared data found'],
+['コピーした文章をLINEやメールなどに貼り付けて送ると、受け取った人がこのアプリに取り込めます。','Paste the copied text into a message or email and send it; the receiver can import it into this app.'],
+['コピーする','Copy'],['共有された文章を取り込む','Import shared text'],['いまのタスクに追加','Add to current tasks'],['もう一度押すと置き換え','Press again to replace'],['置き換える','Replace'],
+['取り込んだタスクのタグが自分のアプリにないときは、教科つきで自動的につくられます。','If an imported task\'s tag isn\'t in your app, it is created automatically with its subject.'],
+['曜日ごとの予定','Weekly plan'],['共有など','Share, etc.'],['毎日のタスクを共有','Share daily tasks'],['曜日','' ],['(今日)',' (today)'],
+['この日の予定はありません。','Nothing planned for this day.'],['＋ この曜日に追加','+ Add to this day'],
+['未設定の場合は、教科の期限（','If not set, the subject deadline ('],['）が使われます。',') is used.'],
+['タスク名','Task name'],['教科名','Subject name'],['タスクの期限','Task deadline'],['教科の期限','Subject deadline'],['期限を消す','Clear deadline'],
+['もう一度タップで削除','Tap again to delete'],['この教科を削除','Delete this subject'],
+['確認項目の右上の × で、項目を1つずつ削除できます。','Use the × at the top right of an item to delete it.'],
+['項目なし','No items'],['確認項目がありません。下のボタンから範囲を入れて作成します。','No checklist items yet. Create them with a range using the button below.'],
+['すべて完了','Mark all done'],['すべて未完了','Mark all not done'],['このタスクを勉強する(タイマーへ)','Study this task (go to timer)'],
+['＋ 確認項目を追加','+ Add checklist items'],['確認項目を追加','Add checklist items'],['範囲・内容','Range / content'],
+['例: 8〜13 / 1,3,5 / ワーク復習','e.g. 8–13 / 1,3,5 / workbook review'],['単位（任意）','Unit (optional)'],['例: ページ','e.g. pages'],['追加','Add'],['やめる','Cancel'],
+['タスクがありません。下のボタンから追加します。','No tasks yet. Add one with the button below.'],['＋ タスクを追加','+ Add task'],['タスクを追加','Add task'],
+['例: 漢文ノート','e.g. Kanbun notes'],['期限（任意）','Deadline (optional)'],
+['データを共有する','Share data'],['ここに貼り付け','Paste here'],['いまのデータに追加','Add to current data'],['もう一度タップで置き換え','Tap again to replace'],
+['次の期限　','Next deadline: '],['期限を設定すると、いちばん近い期限がここに出ます。','Set a deadline and the nearest one will show here.'],
+['全体の進捗 ','Overall progress '],['共有','Share'],['全体の進捗','Overall progress'],
+['サンプルを表示中です。教科を追加すると、サンプルは消えます。','Showing sample data. Adding a subject removes it.'],['サンプルを消して始める','Clear sample and start'],
+['まだ教科がありません。下のボタンから追加します。','No subjects yet. Add one with the button below.'],['＋ 教科を追加','+ Add subject'],['教科を追加','Add subject'],
+['例: 国語','e.g. Japanese'],
+['教科の名前がタグの教科と同じで、タスクの名前がタグの名前と同じだと、勉強を記録するときに自動で選ばれて、確認項目をチェックできます。','If the subject name matches a tag\'s subject and the task name matches the tag\'s name, it is picked automatically when you log study, so you can tick its checklist items.'],
+['」をつくって、タイマーを始めました','” and started the timer'],['タイマーを始めました','Timer started'],
+['教科名を入力してください','Enter a subject name'],['教科を追加しました','Subject added'],['タスク名を入力してください','Enter a task name'],['タスクを追加しました','Task added'],
+['範囲か内容を入力してください','Enter a range or content'],['同じ項目がすでにあります','Those items already exist'],
+['表示','View'],['今日と毎日','Today & daily'],['テスト進捗','Test progress'],['いまはサンプルの毎日のタスクを表示しています。','Showing sample daily tasks.'],['サンプルを消す','Clear sample'],
+[' 大成功!',' Great success!'],['計測を捨てて、もどりました','Discarded the timing and went back'],
+['時間は1〜600分の間で入れてください','Enter a time between 1 and 600 minutes'],['量は0以上の数で入れてください','Enter an amount of 0 or more'],
+['ごほうび +','Reward +'],['(大成功!)',' (Great success!)'],['記録しました','Saved'],['。+','. +'],
+['いまのタスクに追加','Add to current tasks'],
+['同じ教科・同じ単位の記録が3回たまると、いつものペースとの比べ方が出ます。','After 3 records for the same subject and unit, you will see how you compare with your usual pace.'],
+['量を入れると、ペース(効率)を調べられます。','Enter an amount to check your pace (efficiency).'],
+['いまはサンプルのデータを表示しています。最初の記録を保存すると、サンプルは消えます。','Showing sample data. Saving your first record removes it.'],
+['選択中: ','Selected: '],['＋ タスクタグをつくる','+ Create task tag'],
+['【タスクタグ】共有データ','[Task tags] shared data'],
+['アプリの「タイマー」→「せってい」→「共有・取り込み」の取り込み欄に、この文章をそのまま貼り付けてください。','Paste this text as-is into the import box under Timer → Settings → Share / import in the app.'],
+['共有データが見つかりません。「TGS1:」で始まる行まで含めて貼り付けてください。','No shared data found. Paste it including the line that starts with "TGS1:".'],
+['すでに同じタスクタグがあります','You already have the same task tags'],
+['タスクタグを共有する','Share task tags'],
+['教科とタスク名、単位、色が入ります。LINEやメールに貼り付けて送ると、受け取った人が取り込めます。','Includes subject, task name, unit and color. Paste it into a message or email and the receiver can import it.'],
+['いまのタグに追加','Add to current tags'],['同じ教科・同じ名前のタグは追加されません。記録や毎日のタスクは取り込まれません。','Tags with the same subject and name are not added. Records and daily tasks are not imported.'],
+['好きな色を選ぶ','Pick any color'],['色 ','Color '],['色','Color'],['タスクの名前','Task name'],['教科','Subject'],['＋ 教科を追加','+ Add subject'],
+['新しい教科の名前(20文字まで)','New subject name (up to 20 characters)'],['例:古文、生物、情報','e.g. Classics, Biology, Informatics'],
+['先に教科を選んでください','Choose a subject first'],['タスクの名前を入れてください','Enter a task name'],['色を選んでください','Choose a color'],['同じ教科に同じ名前のタグがあります','A tag with the same name already exists in this subject'],
+['タスクタグをつくりました','Task tag created'],['タグを削除しました','Tag deleted'],['このタグを削除','Delete this tag'],
+['記録や毎日のタスクで使っているタグは削除できません。教科・名前・色は変えられます。','Tags used in records or daily tasks can\'t be deleted. You can still change the subject, name and color.'],
+['タグは1つ以上必要です。','At least one tag is required.'],
+['タスクタグを変える','Edit task tag'],['新しいタスクタグ','New task tag'],['① 教科(先に選びます)','① Subject (choose first)'],['② タスクの名前(タグの名前・20文字まで)','② Task name (tag name, up to 20 characters)'],
+['例:漢字ドリル、単語帳、漢文ノート','e.g. Kanji drills, Vocab book, Kanbun notes'],['色(同じ教科は同じ色になります)','Color (same subject = same color)'],['ふだん使う単位','Usual unit'],
+['集中度','Focus'],['1 ぼんやり','1 Spaced out'],['5 集中できた','5 Fully focused'],['単位','Unit'],['今日の勉強時間の達成率','Today\'s study-time progress'],
+['計測中: ','Timing: '],['もどる ›','Back ›'],['いまの記録','Latest record'],['お任せ','Surprise me'],['今日のタスク ','Today\'s tasks '],['せってい','Settings'],
+['今日のタスクがまだありません。「タスク」タブで決められます','No tasks for today yet. You can set them in the Tasks tab.'],
+['(タップで教科の選び直し)',' (tap to change subject)'],['今日','Today'],['✓ 完了','✓ Done'],
+['。1回タップで終わって記録、2回タップで計測を捨ててもどります','. Tap once to finish and save; double-tap to discard and go back'],
+['経過時間','Elapsed time'],['教科の欄を 1回タップ=終わって記録 / 2回タップ(ダブルタップ)=計測を捨ててもどる','Tap the subject bar once = finish and save / twice (double-tap) = discard and go back'],
+['再開','Resume'],['集中力','Focus'],['学習量','Amount studied'],['例:12','e.g. 12'],['確定','Confirm'],['キャンセル','Cancel'],
+['集中中','FOCUSING'],['一時停止中','PAUSED'],['じゅんび','READY'],
+['1日の目標(分)','Daily goal (min)'],['目標を15分へらす','Decrease goal by 15 min'],['目標を15分ふやす','Increase goal by 15 min'],['変える','Edit'],['共有・取り込み','Share / import'],
+['限界時間の1分前に、画面でおしらせする(音は出ません)','Show an on-screen notice 1 minute before the limit time (no sound)'],
+['まだ記録なし','No record yet'],['学習時間','Study time'],['カレンダー','Calendar'],['少ない','Less'],['多い(1日の目標の1.5倍で最も濃く)','More (darkest at 1.5× the daily goal)'],
+['得意・苦手','Strong / weak'],['勉強時間','Study time'],['平均点','Average score'],['平均点が入っている教科は、すべて平均点以上でした。','Every subject with an average score entered was at or above the average.'],
+['前回のテスト','Previous test'],['同じ教科の前回比','Vs. last time (same subject)'],['同じ教科の前回のテストと、偏差値はほぼ同じでした。','The deviation scores were about the same as the last test in the same subjects.'],
+['はじめに','Getting started'],['2教科以上、または2回以上のテスト結果を入れると、くらべる分析が出ます。','Enter results for 2+ subjects or 2+ tests to see comparison analysis.'],
+['見かた','How to read'],['教科や回数が少ないうちは、たまたまの影響が大きくなります。勉強時間との関係は、目安として見てください。','With few subjects or tests, chance has a big effect. Treat the link with study time as a rough guide.'],
+['教科ごとの偏差値。50が平均です。','Deviation score by subject. 50 is the average.'],['偏差値なし','no deviation score'],['偏差値','Deviation score '],['点数','Score'],
+['テストごとの偏差値の推移。50が平均です。','Deviation score trend by test. 50 is the average.'],
+['テストの名前を入れてください(例:二学期中間)','Enter the test name (e.g. Term 2 midterm)'],['テストが終わった日を入れてください','Enter the date the test finished'],
+['これからの日付は入れられません','You can\'t enter a future date'],['教科を入れてください','Enter a subject'],['満点は1〜1000の数で入れてください','Enter a full score between 1 and 1000'],
+['点数は0〜満点の間で入れてください','Enter a score between 0 and the full score'],['平均点は0〜満点の間で入れてください','Enter an average between 0 and the full score'],
+['偏差値は0より大きく100以下で入れてください','Enter a deviation score above 0 and up to 100'],
+['保存しました。続けて別の教科も入れられます','Saved. You can keep adding other subjects.'],['直しました','Updated'],['同じテストの同じ教科だったので、結果を更新しました','Same test and subject, so the result was updated'],
+['結果は300件までです。古いものを消してください','Up to 300 results. Please delete old ones.'],
+['テスト進捗の期限がすぎた教科','Subjects past their test-progress deadline'],['タップすると、教科と期限の日付が入ります。','Tap to fill in the subject and deadline date.'],
+['テストの名前','Test name'],['例:二学期中間','e.g. Term 2 midterm'],['テストが終わった日','Test end date'],['例:国語','e.g. Japanese'],['満点','Full score'],['平均点(なくてもOK)','Average score (optional)'],['偏差値(なくてもOK)','Deviation score (optional)'],
+['平均点と偏差値は、成績表などに書いてあれば入れます。同じテストの名前で、教科ごとに1つずつ入れていきます。','Enter the average and deviation score if they\'re on your report. Use the same test name and add one subject at a time.'],
+['直して保存','Save changes'],['この教科を保存','Save this subject'],['まだテストの結果がありません。上のフォームから入れると、ここに分析が出ます。','No test results yet. Enter them in the form above and the analysis will appear here.'],
+['見るテスト','Test to view'],['受けた教科','Subjects taken'],['合計点','Total score'],['平均点との差','Gap from average'],['平均偏差値','Avg. deviation score'],['差','Gap'],['直す','Edit'],['削除','Delete'],
+['勉強時間をみる期間','Study-time window'],['教科ごとの偏差値(50が平均)','Deviation score by subject (50 = average)'],['全教科の平均','All-subject average'],['偏差値の推移(テストごと)','Deviation score trend (per test)'],
+['同じ教科で、偏差値を入れたテストが2回以上になると、ここに推移が出ます。','Once a subject has 2+ tests with a deviation score, the trend appears here.'],
+['もう一度押すと、このテストの結果がすべて消えます','Press again to delete all results of this test'],['このテストの結果をすべて削除','Delete all results of this test'],
+['教科ごとの結果','Results by subject'],['勉強時間は、テストの日までの','Study time is the total for the same subject entered in Log over the'],['に「きろく」へ入れた、同じ教科の合計です。',' before the test.'],
+['記録から見えること','What your records show'],['テスト結果を直す','Edit test result'],['テスト結果を入れる','Enter test result'],['テスト分析','Test analysis'],['とじる','Close'],
+['テストが終わった教科の「テストの名前・点数・平均点・偏差値」を入れると、教科ごとの比べ方や、勉強時間との関係がわかります。','Enter the test name, score, average and deviation score for each subject to compare subjects and see how they relate to study time.'],
+['日付','Date'],['始めた時刻','Start time'],['新しいタスクタグは「タイマー」の「せってい」でつくれます。','Create new task tags in Timer → Settings.'],['時間(分)','Time (min)'],['やった量','Amount done'],
+['日付と時刻を入れてください','Enter a date and time'],['未来の日時は記録できません','Future times can\'t be recorded'],['記録に追加','Add to log'],
+['あとから記録する(タイマーを使わなかったとき)','Log later (when you didn\'t use the timer)'],['これまでの記録','Past records'],['まだ記録がありません。タイマーを使うか、上のフォームから追加できます。','No records yet. Use the timer or add one with the form above.'],
+['合計 ','Total '],['開始',' start'],['1時間あたり ','Per hour: '],['効率指数 ','Efficiency index '],['さらに表示','Show more'],
+['下の文字をすべてコピーして、メモなどに保存してください。','Copy all the text below and save it somewhere, e.g. in a notes app.'],['書き出したデータ','Exported data'],['書き出したデータを貼り付け','Paste exported data'],['書き出したJSONをここに貼り付け','Paste exported JSON here'],
+['すべて消しました','Everything deleted'],['もう一度押すと、すべて消えます','Press again to delete everything'],['記録をすべて消す','Delete all records'],['バックアップ','Backup'],
+['記録は、いま使っているこの端末のブラウザに保存されます。端末を変えるときは書き出してください。テスト分析の結果もJSONに入ります。','Records are stored in this device\'s browser. Export them before switching devices. Test analysis results are included in the JSON.'],
+['このブラウザでは保存できないため、ページを閉じると記録が消えます。','This browser can\'t save data, so your records will be lost when you close the page.'],
+['書き出す(JSON)','Export (JSON)'],['表計算用(CSV)','For spreadsheets (CSV)'],['読み込む','Import'],['貼り付けて読み込む','Paste to import'],['テスト分析を開く','Open test analysis'],['記録を足す','Add a record'],
+['まだ自分の記録がありません','You have no records of your own yet'],['(取込)',' (imported)'],
+['読み込めませんでした。書き出したJSONファイルを選んでください','Couldn\'t import. Choose an exported JSON file.'],
+['毎日の学習時間(タスクタグ別の積み上げ)。数値は下の表でも確認できます。','Daily study time (stacked by task tag). Values are also in the table below.'],
+['合計','Total'],['目標 ','Goal '],['効率指数の推移。100がいつもの自分です。','Efficiency index trend. 100 is your usual self.'],['いつもの自分','Your usual'],['効率指数','Efficiency index'],
+['ごとの効率。いつもの自分との差を示します。',' efficiency. Shows the gap from your usual.'],['いつも','Usual'],[' ベスト',' best'],['記録が足りません','Not enough records'],['記録','Records'],
+['長さ','Length'],['時間帯','Time of day'],['集中度が高い記録と低い記録で、効率に大きな差は見られません。','There is no big efficiency difference between high-focus and low-focus records.'],
+['なっています。','.'],
+['記録の数が少ないうちは、たまたまの影響が大きくなります。目安として見てください。','With few records, chance has a big effect. Treat this as a rough guide.'],
+['1週間','1 week'],['この1週間の学習時間','Study time this week'],['この一ヶ月の学習時間','Study time this month'],['全期間の学習時間','Study time, all time'],['一ヶ月','1 month'],['全期間','All time'],
+['2日分以上の記録がたまると、ここに出ます。','This appears once you have records for 2+ days.'],['勉強した日','Days studied'],['効率指数が100以上の日','Days with efficiency index ≥ 100'],
+['曜日ごとの総学習時間','Total study time by weekday'],['総学習時間','Total study time'],['1日あたり','Per day'],
+['曜日ごとの傾向は、量を入れた記録が3曜日以上で、それぞれ3回以上たまると出てきます。','Weekday trends appear once 3+ weekdays each have 3+ records with an amount.'],
+['休日','Weekend'],['周期','Cycle'],['つかいみち','How to use'],
+['疲れやすい曜日は、あらかじめ学習量を抑えておく。休日は、始める時間を変えて効率がどう変わるかを見てみる。','On days you tire easily, plan a lighter load. On weekends, try changing your start time and see how efficiency changes.'],
+['曜日ごとの傾向','Weekday trends'],['月曜日〜日曜日ごとの総学習時間と、平均の効率指数(100がいつもの自分)です。','Total study time and average efficiency index (100 = your usual) for Monday through Sunday.'],
+['この期間の記録がありません。','No records in this period.'],['平均の効率(いつもとの差)','Average efficiency (vs. usual)'],['見えること','What it shows'],
+['ぼんやり','Spaced out'],['集中度1','Focus 1'],['集中度2','Focus 2'],['集中度3','Focus 3'],['集中度4','Focus 4'],['集中度5','Focus 5'],['集中','Focused'],
+['多い教科: ','Most frequent subjects: '],[' ・集中',' · focus '],['・集中',' · focus '],[' / 効率',' / eff. '],
+['この期間は、当てはまる記録がありません。','No matching records in this period.'],['集中度と効率のギャップ','Focus vs. efficiency gap'],
+['「自分では集中できたか(5段階)」と「実際のペース(効率指数)」の食いちがいを探します。','Looks for mismatches between how focused you felt (5 levels) and your actual pace (efficiency index).'],
+['集中度ごとの、いつもとの差','Gap from usual by focus level'],['高集中 × 低効率(集中4以上・効率90以下)','High focus × low efficiency (focus ≥ 4, efficiency ≤ 90)'],
+['「頑張っているのに進まない」状態です。難易度が高すぎる、勉強法が合っていない、環境(雑音等)に問題がある可能性があります。','You\'re working hard but not getting far. The material may be too hard, the method may not suit you, or the environment (noise, etc.) may be a problem.'],
+['低集中 × 高効率(集中2以下・効率110以上)','Low focus × high efficiency (focus ≤ 2, efficiency ≥ 110)'],
+['「気乗りしないがサクサク進む」状態です。内容が易しすぎる、作業的(単純暗記など)である可能性があります。','You don\'t feel into it but progress quickly. The content may be too easy or mechanical (e.g. simple memorization).'],
+['「ただ頑張る」のではなく、学習のやり方や教材のレベルが合っているかをふり返るきっかけにします。','Use this to review whether your study method and material level fit, rather than just trying harder.'],
+['教科ごとの限界時間','Limit time by subject'],
+['1回の勉強が何分を超えると、効率指数が100(いつもの自分)を下回り始めるかの目安です。全期間の記録から出します。','An estimate of how many minutes one session can run before the efficiency index drops below 100 (your usual). Based on all-time records.'],
+['量を入れた記録がたまると、ここに出ます。','This appears once you have records with an amount.'],['見つかりません','Not found'],
+['長さごとの効率指数を表で見る','View efficiency index by length as a table'],
+['タイマーで、限界時間の1分前に画面でおしらせする(音は出ません)','In the timer, show an on-screen notice 1 minute before the limit time (no sound)'],
+['休憩する(一時停止)','Take a break (pause)'],['あとで','Later'],['期間','Period'],['サンプルデータ','Sample data'],
+['この期間の記録がまだありません。タイマーで記録すると、ここにグラフが出ます。','No records in this period yet. Log with the timer and charts will appear here.'],['タイマーへ','Go to timer'],
+['1日の平均','Daily average'],['目標を超えた日','Days over goal'],['連続で勉強中','Current streak'],['表で見る','View as table'],['やった量:','Amount done: '],
+['何を、どのくらい','What and how much'],['効率の推移','Efficiency trend'],['1日ごとの効率指数。100が「いつもの自分」です。','Efficiency index per day. 100 is "your usual."'],
+['量を入れた記録が2日分以上あると、ここに推移が出ます。(同じ教科・同じ単位で3回以上の記録も必要です)','The trend appears once you have records with an amount on 2+ days. (3+ records for the same subject and unit are also needed.)'],
+['取り組んだ長さ','session length'],['始めた時間帯','start time of day'],['どのくらい続けるといい?','How long should you keep going?'],['1回の長さ(分)ごとの、いつもとの差。','Gap from usual by session length (min).'],
+['いつ始めるといい?','When should you start?'],['始めた時間帯ごとの、いつもとの差。','Gap from usual by start time of day.'],
+['効率指数は、タスクごとの「これまでの平均ペース(時間あたりの量)」を100として、その記録のペースを比べた数字です。量を入れた記録だけが対象です。','The efficiency index compares each record\'s pace with the task\'s average pace so far (amount per time), set to 100. Only records with an amount are counted.'],
+['休憩','Break'],
+['目標時間を超えた日','Days over the goal'],
+['えんぴつ','Pencil'],['ノート','Notebook'],['学習机','Study desk'],['電気スタンド','Desk lamp'],['参考書','Reference book'],['自習室','Study room'],['家庭教師','Tutor'],['塾','Cram school'],['図書館','Library'],['大学','University'],
+['連続バフ +','Streak buff +'],['連続バフ','Streak buff'],['プレステージ','Prestige'],['アセンション','Ascension'],
+['ごほうびポイント','Reward points'],['ポイントの計算式','Points formula'],['基礎','Base'],['加算','Flat'],['強化の倍率(全部)','Upgrade multipliers (all)'],
+[' ・ 加算 +',' · Flat +'],['倍率 ×','Multiplier ×'],[' ・ アセンション ',' · Ascension '],
+['アセンション: Lv1に戻る(倍率はそのまま)','Ascend: back to Lv1 (multiplier kept)'],[' ・ 上限 ',' · Cap '],[' ・ コスト増加率 ×',' · Cost growth ×'],[' ・ コストはLv',' · Cost starts from Lv'],['のコストから',''],
+['強化','Upgrade '],[' ・ Lv ',' · Lv '],['いま: ×','Now: ×'],
+['1e5ptで 乗数+0.10・倍率×10。eが1増えるごとに 乗数は+0.10ずつ、倍率は10倍ずつ増えます。','At 1e5 pt: exponent +0.10, multiplier ×10. Each +1 in e adds +0.10 to the exponent and ×10 to the multiplier.'],
+['リセットされる: ポイント、強化のレベル・倍率・加算・アセンション','Reset: points, upgrade levels, multipliers, flat bonuses, ascensions'],
+['残る: プレステージの倍率と乗数(くり返すと積み上がります)、これまでの合計','Kept: the prestige multiplier and exponent (they stack when repeated) and the lifetime total'],
+['もう一度タップでプレステージする','Tap again to prestige'],['プレステージする','Prestige'],['さいきんの動き','Recent activity'],
+['ここに、強化の購入やタスク完了の記録が出ます。','Upgrade purchases and task completions will show up here.'],
+['同じ確認項目や、同じ日の同じ毎日のタスクをチェックし直しても、ポイントは増えません(1回だけ)。','Re-checking the same checklist item, or the same daily task on the same day, does not give more points (once only).'],
+['1e5(10万)pt以上でできます。ポイントと強化をリセットして、全体にかかる倍率(倍率^乗数)を強くします。','Available at 1e5 (100,000) pt or more. Resets points and upgrades to strengthen the overall multiplier (multiplier^exponent).'],
+['アセンションする','Ascend'],
+['通知を使う(限界時間・目標達成・夕方のリマインド)','Use notifications (limit time, goal reached, evening reminder)'],
+['今日の目標を達成しました!','You reached today\'s goal!'],['そろそろ限界時間です','Nearing your limit time'],
+['今日のタスクはぜんぶできています','All of today\'s tasks are done'],
+['このブラウザは通知に対応していません','This browser doesn\'t support notifications'],['通知が許可されませんでした','Notifications were not allowed'],
+['Language / 言語','Language'],
+['(Pagesを入力)',''],
+];
+/* X: 完全一致のみ */
+var X=[
+['日','days'],['分','min'],['時間','h'],['点','pts'],
+['ページ','pages'],['問','questions'],['語','words'],['単元','units'],['回','times'],
+['朝','Early'],['午前','Morning'],['午後','Afternoon'],['夕方','Evening'],['夜','Night'],['深夜','Late night'],
+['〜15','≤15'],['90〜','90+'],['10〜','10+'],['20〜','20+'],['30〜','30+'],['40〜','40+'],['50〜','50+'],['60〜','60+'],['〜10分','≤10 min'],
+['日連続','days in a row'],['日本語','日本語'],['English','English'],
+['タスク','Task'],['メモ','Memo'],['量','Amount'],['ひとこと','Note'],['開始時刻','Start time'],
+['長さ','Length'],['期限切れ','Overdue'],['全期間','All time'],
+['教科ごとの偏差値','Deviation score by subject'],
+];
+
+/* ---- 文章パターン(A): 語順が変わる動的な文 ---- */
+var D='([+−±]?[\\d.]+)';
+var PA=[
+[/期限切れ (\d+)日/g,'Overdue $1d'],
+[/あと(\d+)日/g,function(m,n){return n+(n==='1'?' day':' days')+' left';}],
+[/今日のタスク「(.*?)」/g,'Today\'s task “$1”'],
+[/^(.*?)を未完了にする$/,'Mark $1 as not done'],
+[/^(.*?)を完了にする$/,'Mark $1 as done'],
+[/^(.*?) のタイマーをはじめる$/,'Start timer for $1'],
+[/^(.*)は予定がありません。$/,'Nothing planned for $1.'],
+[/（期限 ([^）]*)）/g,' (due $1)'],
+[/(\d+)教科・(\d+)タスク・(\d+)項目を読み取りました。/,'Read $1 subjects, $2 tasks and $3 items.'],
+[/^「(.*)」のタスクを選ぶと、やった確認項目を完了にできます。$/,'Pick a task in “$1” to mark the items you did as done.'],
+[/未設定の場合は、教科の期限（(.*?)）が使われます。/,'If not set, the subject deadline ($1) is used.'],
+[/(\d+)件を完了にします。/,'Will mark $1 items as done.'],
+[/(\d+)件の毎日のタスク\(タグ(\d+)個\)を読み取りました。/,'Read $1 daily tasks ($2 tags).'],
+[/(\d+)件を取り込みました/,'Imported $1 items'],
+[/\(タグを(\d+)個つくりました\)/,' ($1 tags created)'],
+[/。(\d+)件は取り込めませんでした/,'. $1 could not be imported'],
+[/^(.*)を変える$/,'Edit $1'],[/^(.*)を編集$/,'Edit $1'],[/^(.*)を削除$/,'Delete $1'],
+[/タスクタグ「(.*?)」をつくって、タイマーを始めました/,'Created task tag “$1” and started the timer'],
+[/(\d+)件の確認項目を追加しました/,'Added $1 checklist items'],
+[/(\d+)教科を取り込みました/,'Imported $1 subjects'],[/(\d+)教科で置き換えました/,'Replaced with $1 subjects'],
+[/^(.*)記録しました。確認項目(\d+)件を完了にしました/,'Saved. Marked $2 items as done'],
+[/ペースは1時間あたり (.*?)です。/,'Your pace is $1 per hour.'],
+[/いつもの(.*?)のペースと同じくらいです。/,'About the same as your usual $1 pace.'],
+[/いつもの(.*?)のペースより ([+−])(\d+)% (はやい|ゆっくり)です。/,function(m,a,sg,n,w){return n+'% '+(w==='はやい'?'faster':'slower')+' than your usual '+a+' pace.';}],
+[/(\d+)個のタスクタグ\(教科(\d+)つ\)を読み取りました。/,'Read $1 task tags ($2 subjects).'],
+[/(\d+)個のタスクタグを追加しました/,'Added $1 task tags'],[/\((\d+)個はすでにありました\)/,' ($1 already existed)'],
+[/^(\d+)月の学習時間$/,'Study time for month $1'],
+[/^(\d+)月$/,function(m,n){return MON[(+n-1)%12];}],
+[/偏差値がいちばん高いのは「(.*?)」\((.*?)\)、いちばん低いのは「(.*?)」\((.*?)\)で、差は (.*?) です。/,'The highest deviation score is “$1” ($2) and the lowest is “$3” ($4), a gap of $5.'],
+[/テストまでの(\d+)日間の勉強は、「(.*?)」が (.*?)、「(.*?)」が (.*?) でした。/,'In the $1 days before the test you studied “$2” for $3 and “$4” for $5.'],
+[/平均点より低かった教科: /,'Subjects below the average: '],
+[/\(([+−±][\d.]+)点\)/g,' ($1 pts)'],
+[/平均偏差値は「(.*?)」の (.*?) から (.*?) に変わりました\((.*?)\)。受けた教科がちがうと比べにくいので、目安として見てください。/,'Average deviation score changed from $2 (“$1”) to $3 ($4). If the subjects taken differ it is hard to compare, so treat it as a guide.'],
+[/「(.*?)」が ([+−±][\d.]+)\(前回「(.*?)」から。いちばん上がった教科\)/,'“$1” $2 (from “$3”; biggest rise)'],
+[/「(.*?)」が ([+−±][\d.]+)\(いちばん下がった教科\)/,'“$1” $2 (biggest drop)'],
+[/^偏差値は (.*)。$/,'Deviation score: $1.'],
+[/勉強時間が前回より増えた(\d+)教科のうち、偏差値が上がったのは(\d+)教科/,'of the $1 subjects where study time rose from last time, the deviation score rose in $2'],
+[/減った(\d+)教科のうち、偏差値が上がったのは(\d+)教科/,'of the $1 where it fell, it rose in $2'],
+[/^(.*?)です。$/,'$1.'],
+[/^\(いちばん下がった教科\)$/,'(biggest drop)'],
+[/いまの目標 (\d+)分\/日/,'Current goal: $1 min/day'],
+[/^(\d+)日連続$/,function(m,n){return n+'-day streak';}],
+[/目標時間を超えた日\(1日(\d+)分\)/,'Days over the goal ($1 min/day)'],
+[/^(.*) (\d+)日連続を達成。タップしてポイントバフ \+(\d+)%をもらう$/,'$1: $2-day streak reached. Tap to claim the +$3% points buff'],
+[/ポイントバフ \+(\d+)% をもらいました\(合計 ×([\d.]+)\)/,'Points buff +$1% claimed (total ×$2)'],
+[/^(\d+)回( ベスト)?$/,function(m,n,b){return n+'x'+(b?' best':'');}],
+[/(\d+)回\(2回以上で表示\)/,'$1 (shown from 2)'],
+[/(\d+)分ごろ/,'about $1 min'],
+[/あと(\d+)回$/,'$1 more'],
+[/記録(\d+)回から。(\d+)分を超えると、効率指数が100を下回りやすくなります。/,'Based on $1 records. Past $2 min, the efficiency index tends to drop below 100.'],
+[/記録(\d+)回では、長くしても100を下回る傾向は見つかりませんでした。/,'With $1 records, no tendency to drop below 100 with longer sessions was found.'],
+[/記録が(\d+)回です。6回たまると出ます。/,'You have $1 records. It appears at 6.'],
+[/量と集中度を入れた記録が6回以上たまると出てきます。\(いまは(\d+)回\)/,'This appears once you have 6+ records with amount and focus. (Now: $1)'],
+[/効率の傾向は、量を入れた記録が6回以上たまると出てきます。いまは(\d+)回です。\(同じ教科で3回以上の記録も必要です\)/,'Efficiency trends appear once you have 6+ records with an amount. Now: $1. (3+ records for the same subject are also needed.)'],
+[/「(.*?)」のまとまりで取り組んだときが、いつものペースより ([+−]\d+)% で、いちばん効率がよい傾向です。\((\d+)回\)/,'Working in “$1” chunks gives the best efficiency: $2% vs. your usual pace ($3 times).'],
+[/「(.*?)」に始めた記録が、いつものペースより ([+−]\d+)% で、いちばん効率がよい傾向です。\((\d+)回\)/,'Records started in “$1” give the best efficiency: $2% vs. your usual pace ($3 times).'],
+[/集中度を4以上にできた記録は、3以下の記録より効率指数が (\d+) 高くなっています。/,'Records with focus 4+ have an efficiency index $1 higher than records with focus 3 or below.'],
+[/集中度を4以上にできた記録は、3以下の記録より効率指数が (\d+) 低くなっています。/,'Records with focus 4+ have an efficiency index $1 lower than records with focus 3 or below.'],
+[/^(.*?)の効率指数は、期間の前半より後半のほうが (\d+) 高くなっています。/,'The efficiency index for $1 is $2 higher in the second half of the period than in the first.'],
+[/^(.*?)の効率指数は、期間の前半より後半のほうが (\d+) 低くなっています。/,'The efficiency index for $1 is $2 lower in the second half of the period than in the first.'],
+[/([A-Z][a-z]{2})曜日がいちばん効率がよく\(効率指数 (\d+)\)、([A-Z][a-z]{2})曜日がいちばん低くなっています\((\d+)\)。/,'$1 is the most efficient (efficiency index $2) and $3 is the lowest ($4).'],
+[/休日は1日あたり (.*?) と、平日\((.*?)\)より時間は取れていますが、効率指数は (\d+) で平日の (\d+) より低く、だらけ気味かもしれません。/,'On weekends you study $1 per day, more than on weekdays ($2), but the efficiency index is $3 vs. $4 on weekdays, so you may be slacking a bit.'],
+[/休日の効率指数\((\d+)\)は、平日\((\d+)\)より高くなっています。/,'The weekend efficiency index ($1) is higher than on weekdays ($2).'],
+[/([A-Z][a-z]{2})曜日から([A-Z][a-z]{2})曜日にかけて、効率指数が (\d+) 下がっています。疲れが出やすい曜日かもしれません。/,'From $1 to $2 the efficiency index drops by $3. These may be days when you tire easily.'],
+[/そろそろ(.*?)の限界時間です。5分休憩しませんか\?/,'Time for a 5-minute break? You\'re nearing your limit for $1.'],
+[/^(.*)を5分休憩しませんか\?$/,'Take a 5-minute break from $1?'],
+[/^(.*)の限界時間です。5分休憩しませんか\?$/,'Time for a 5-minute break from $1?'],
+[/の勉強、おつかれさまでした。/,' of study — great work.'],
+[/今日のタスクがあと(\d+)件のこっています/,'$1 of today\'s tasks remain'],
+[/1日が終わるまであと6時間。タップするとランダムでタイマーが始まります。/,'6 hours left in the day. Tap to start the timer on a random task.'],
+[/^(.*?)\((\d+)回\)$/,'$1 ($2)'],
+[/(\d+)件を読み込みました/,'Imported $1 records'],[/\(テスト結果(\d+)件も\)/,' (plus $1 test results)'],
+[/これまでの合計 (.*?)pt ・ 1回の獲得 \+(.*?)pt。タスクの確認項目を完了すると1項目ごとに、毎日のタスクにチェックすると1回分、勉強を記録すると5分ごと\(最大12回分\)にもらえます。/,'Total so far: $1 pt · +$2 pt per gain. You earn it for each checklist item you complete, once for checking off a daily task, and for every 5 minutes of recorded study (up to 12 portions).'],
+[/^プレステージ (\d+)回$/,'Prestige ×$1'],
+[/Lv1にすると 加算 \+(.*?)、倍率 \+0\.20/,'At Lv1: flat +$1, multiplier +0.20'],
+[/^(.*)をアセンションする$/,'Ascend $1'],[/^(.*)のレベルを上げる$/,'Upgrade $1'],
+[/レベルを上げるたびに倍率が \+0\.20、コストは ×(.*?)\(アセンションごとに増加率が \+0\.10\)。/,'Each level adds +0.20 to the multiplier; cost grows ×$1 per level (the growth rate rises +0.10 with each ascension).'],
+[/いま\(e=(\d+)\)プレステージすると: 乗数 \+(.*?)、倍率 ×(.*?) → ×(.*?) になります。/,'Prestiging now (e=$1): exponent +$2, multiplier ×$3 → ×$4.'],
+[/あと (.*?)pt でできます\(いま (.*?)pt\)。/,'$1 pt to go (now $2 pt).'],
+[/勉強の記録 (\d+)分/,'Study log $1 min'],[/勉強 (\d+)回分/,'Study ×$1'],
+[/アセンション\((\d+)回目\)/,'Ascension #$1'],
+[/プレステージ\(乗数 \+(.*?) \/ 倍率 ×(.*?)\)/,'Prestige (exponent +$1 / multiplier ×$2)'],
+[/確認項目 (\d+)件を完了/,'Completed $1 checklist items'],[/確認項目 (\d+)件/,'$1 checklist items'],
+[/強化(\d+)/,'Upgrade $1'],
+[/(\d+)項目/g,'$1 items'],[/(\d+)タスク/g,'$1 tasks'],[/(\d+)日間/g,'$1 days'],[/(\d+)教科/g,'$1 subjects'],
+];
+/* ---- 数字+単位(C): 辞書のあとで処理 ---- */
+var PC=[
+[/(\d)時間/g,'$1 h'],[/(\d)分/g,'$1 min'],[/(\d)時/g,'$1h'],
+[/(^|\D)1日/g,'$11 day'],[/(\d)日/g,'$1 days'],
+[/(\d)個/g,'$1 tags'],[/(\d)件/g,'$1 items'],
+[/(^|\D)1回/g,'$11 time'],[/(\d)回/g,'$1 times'],
+[/(\d)点/g,'$1 pts'],[/(\d+)章/g,'Ch. $1'],[/(\d)問/g,'$1 questions'],[/(\d)語/g,'$1 words'],[/(\d)単元/g,'$1 units'],
+[/(\d)教科/g,'$1 subjects'],[/(\d)つ/g,'$1'],
+[/、/g,', '],[/。/g,'. '],[/：/g,': '],[/　/g,' '],
+];
+var MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+var EXM=new Map(), IDX={};
+F.forEach(function(p){EXM.set(p[0],p[1]); if(p[0]){var c=p[0].charAt(0);(IDX[c]||(IDX[c]=[])).push(p);}});
+X.forEach(function(p){EXM.set(p[0],p[1]);});
+Object.keys(IDX).forEach(function(k){IDX[k].sort(function(a,b){return b[0].length-a[0].length;});});
+var SM={'教科':' subjects','日':' days','分':' min','時間':' h','点':' pts','日連続':' days in a row'};
+var cache=new Map();
+function greedy(s){
+  var out='',i=0,n=s.length;
+  while(i<n){
+    var ch=s.charAt(i), L=IDX[ch], hit=null;
+    if(L){for(var k=0;k<L.length;k++){if(s.substr(i,L[k][0].length)===L[k][0]){hit=L[k];break;}}}
+    if(hit){out+=hit[1];i+=hit[0].length;}else{out+=ch;i++;}
+  }
+  return out;
+}
+function run(s){
+  if(EXM.has(s)) return EXM.get(s);
+  var t=s,i;
+  for(i=0;i<PA.length;i++) t=t.replace(PA[i][0],PA[i][1]);
+  t=greedy(t);
+  for(i=0;i<PC.length;i++) t=t.replace(PC[i][0],PC[i][1]);
+  return t.replace(/ {2,}/g,' ').replace(/\( /g,'(').replace(/ \)/g,')');
+}
+function tr(s,small){
+  if(lang!=='en'||typeof s!=='string'||!JP.test(s)) return s;
+  if(small&&SM[s]!==undefined) return SM[s];
+  var c=cache.get(s); if(c!==undefined) return c;
+  var r=run(s); if(cache.size>5000) cache.clear(); cache.set(s,r); return r;
+}
+/* 共有用の文章(行ごとに訳す。TPB1:などの行はそのまま) */
+function trText(s){
+  if(lang!=='en') return s;
+  return String(s).split('\n').map(function(l){return /^(TPB1|RTP1|TGS1):/.test(l)?l:tr(l);}).join('\n');
+}
+/* ---- DOM ---- */
+var TN=new WeakMap(), AN=new WeakMap(), ATTRS=['placeholder','aria-label','title','alt'];
+var SKIP={SCRIPT:1,STYLE:1,TEXTAREA:1};
+function doText(n){
+  var p=n.parentNode; if(!p||SKIP[p.nodeName]||(p.closest&&p.closest('[data-notr]'))) return;
+  var rec=TN.get(n), d=n.data;
+  if(rec&&rec.t===d) return;               /* 自分が訳した文字のまま */
+  if(lang!=='en'||!JP.test(d)){ if(rec)TN.delete(n); return; }
+  var t=tr(d,p.nodeName==='SMALL');
+  TN.set(n,{o:d,t:t}); if(t!==d) n.data=t;
+}
+function doEl(e){
+  if(e.nodeType!==1||e.nodeName==='SCRIPT'||e.nodeName==='STYLE') return;
+  var m=AN.get(e), i,a,val;
+  for(i=0;i<ATTRS.length;i++){
+    a=ATTRS[i]; if(!e.hasAttribute(a)) continue; val=e.getAttribute(a);
+    m=m||{}; var rec=m[a];
+    if(rec&&rec.t===val) continue;
+    if(lang!=='en'||!JP.test(val)){ if(rec) delete m[a]; continue; }
+    var t=tr(val); m[a]={o:val,t:t}; if(t!==val) e.setAttribute(a,t);
+  }
+  if(m) AN.set(e,m);
+}
+function walk(root){
+  if(!root) return;
+  if(root.nodeType===3){doText(root);return;}
+  if(root.nodeType!==1) return;
+  doEl(root);
+  var w=document.createTreeWalker(root,5,null), n=w.nextNode();
+  while(n){ if(n.nodeType===3) doText(n); else doEl(n); n=w.nextNode(); }
+}
+function restore(root){
+  var w=document.createTreeWalker(root,5,null), n=w.nextNode();
+  while(n){
+    if(n.nodeType===3){var r=TN.get(n); if(r&&n.data===r.t) n.data=r.o; TN.delete(n);}
+    else{var m=AN.get(n); if(m){for(var a in m){if(n.getAttribute(a)===m[a].t) n.setAttribute(a,m[a].o);} AN.delete(n);}}
+    n=w.nextNode();
+  }
+}
+var obs=null;
+function startObs(){
+  if(obs||!window.MutationObserver) return;
+  obs=new MutationObserver(function(ms){
+    if(lang!=='en') return;
+    for(var i=0;i<ms.length;i++){
+      var m=ms[i];
+      if(m.type==='characterData') doText(m.target);
+      else if(m.type==='attributes') doEl(m.target);
+      else m.addedNodes.forEach(function(n){walk(n);});
+    }
+  });
+  obs.observe(document.body,{childList:true,subtree:true,characterData:true,attributes:true,attributeFilter:ATTRS});
+}
+var WDJ=['日','月','火','水','木','金','土'], WDE=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+function setLang(l,keep){
+  if(l!=='en'&&l!=='ja') return;
+  lang=l; saved=true; cache.clear();
+  try{localStorage.setItem(LK,l);}catch(e){}
+  document.documentElement.lang=l;
+  g.I18N.WD.length=0; (l==='en'?WDE:WDJ).forEach(function(x){g.I18N.WD.push(x);});
+  if(l==='en') walk(document.body); else restore(document.body);
+  document.title=l==='en'?'Manabi Log':'まなびログ';
+}
+g.I18N={tr:tr,trText:trText,setLang:setLang,lang:function(){return lang;},saved:function(){return saved;},WD:WDJ.slice(),MON:MON};
+g.I18N.WD.length=0;(lang==='en'?WDE:WDJ).forEach(function(x){g.I18N.WD.push(x);});
+document.documentElement.lang=lang;
+startObs();
+if(lang==='en'){walk(document.body);document.title='Manabi Log';}
+})(window);
+
+</script>
+
+<script>
 /* ====================================================================
    manabilog-game.js v2 ― まなびログ「ごほうび」(タスク完了+強化+アセンション+プレステージ)
    --------------------------------------------------------------------
@@ -630,7 +1049,7 @@ function awardSession(rec){
 function fmt(n){
   if(!Number.isFinite(n)) return '∞';
   n=Math.round(n);
-  if(Math.abs(n)<1e9) return n.toLocaleString('ja-JP');
+  if(Math.abs(n)<1e9) return n.toLocaleString(window.I18N&&I18N.lang()==='en'?'en-US':'ja-JP');
   return n.toExponential(2).replace('e+','e');
 }
 function fx(n){
@@ -830,7 +1249,7 @@ function validTag(t){
     &&(/^#[0-9a-f]{6}$/i.test(t.c)||/^var\(--s[1-6]\)$/.test(t.c))&&UNITS.indexOf(t.unit)>=0;
 }
 rebuildSubj();
-const WD=['日','月','火','水','木','金','土'];
+const WD=I18N.WD;
 const DAY=864e5;
 const LEN=[
   {k:'〜15',sub:'分',name:'15分まで',lo:0,hi:15},
@@ -875,11 +1294,12 @@ const p2=n=>String(n).padStart(2,'0');
 const startOfDay=ms=>{const d=new Date(ms);d.setHours(0,0,0,0);return d.getTime();};
 const addDays=(ms,n)=>{const d=new Date(ms);d.setDate(d.getDate()+n);return d.getTime();};
 const dkey=ms=>{const d=new Date(ms);return d.getFullYear()+'-'+p2(d.getMonth()+1)+'-'+p2(d.getDate());};
-const dateLong=ms=>{const d=new Date(ms);return (d.getMonth()+1)+'月'+d.getDate()+'日('+WD[d.getDay()]+')';};
+const dateLong=ms=>{const d=new Date(ms);return I18N.lang()==='en'?I18N.MON[d.getMonth()]+' '+d.getDate()+' ('+WD[d.getDay()]+')':(d.getMonth()+1)+'月'+d.getDate()+'日('+WD[d.getDay()]+')';};
 function fmtMin(m){
-  const t=Math.round(m);
-  if(t<60) return t+'分';
+  const t=Math.round(m), en=I18N.lang()==='en';
+  if(t<60) return en?t+' min':t+'分';
   const hh=Math.floor(t/60), mm=t%60;
+  if(en) return mm?hh+' h '+mm+' min':hh+' h';
   return mm?hh+'時間'+mm+'分':hh+'時間';
 }
 /* 2:11 のような「時:分」表記(分は切り捨て) */
@@ -908,13 +1328,13 @@ const S={
   sessions:Array.isArray(stored.sessions)?stored.sessions:[],
   goalMin:stored.goalMin>0?stored.goalMin:120,
   timer:Object.assign(defaultTimer(),stored.timer||{}),
-  units:stored.units||{},limitAlert:stored.limitAlert!==false,rec:null,
+  units:stored.units||{},limitAlert:stored.limitAlert!==false,notify:stored.notify===true,nf:(stored.nf&&typeof stored.nf==='object')?stored.nf:{},rec:null,
   sample:false, storageOk:true,
   tab:'timer', range:7, finishing:null, lastResult:null, logLimit:40, exportText:'', tagEdit:null
 };
 S.timer.mode='up';
 function saveStore(){
-  const data={v:1,sessions:S.sample?[]:S.sessions,goalMin:S.goalMin,timer:S.timer,units:S.units,tags:SUBJECTS,board:S.board,bsample:S.bsample,routines:S.routines,rsample:S.rsample,checks:S.checks,tests:S.tests,limitAlert:S.limitAlert};
+  const data={v:1,sessions:S.sample?[]:S.sessions,goalMin:S.goalMin,timer:S.timer,units:S.units,tags:SUBJECTS,board:S.board,bsample:S.bsample,routines:S.routines,rsample:S.rsample,checks:S.checks,tests:S.tests,limitAlert:S.limitAlert,notify:S.notify,nf:S.nf};
   try{localStorage.setItem(KEY,JSON.stringify(data));}catch(e){S.storageOk=false;}
 }
 try{localStorage.setItem(KEY+'.t','1');localStorage.removeItem(KEY+'.t');}catch(e){S.storageOk=false;}
@@ -1142,14 +1562,14 @@ function decodeShare(text){
   }catch(e){return null;}
 }
 function shareText(){
-  if(!S.board.subjects.length) return '共有できるデータがまだありません。';
+  if(!S.board.subjects.length) return I18N.tr('共有できるデータがまだありません。');
   const L=['【テスト進捗ボード】共有データ','アプリの「タスク」→「テスト進捗」→「共有」の取り込み欄に、この文章をそのまま貼り付けてください。',''];
   S.board.subjects.forEach(sb=>{
     L.push('■'+sb.name+' '+Math.round(subjProg(sb).p*100)+'%'+(sb.due?'（期限 '+fmtMD(sb.due)+'）':''));
     sb.tasks.forEach(tk=>{const r=taskProg(tk);L.push('　・'+tk.name+' '+r.done+'/'+r.total+(tk.due?'（期限 '+fmtMD(tk.due)+'）':''));});
   });
   L.push('','TPB1:'+encodeShare());
-  return L.join('\n');
+  return I18N.trText(L.join('\n'));
 }
 const bval=id=>{const el=document.getElementById(id);return el?el.value:'';};
 const bclr=id=>{const el=document.getElementById(id);if(el)el.value='';};
@@ -1403,14 +1823,14 @@ function decodeRoutines(text){
   }catch(e){return null;}
 }
 function routineShareText(){
-  if(!routineList().length) return '共有できるデータがまだありません。';
+  if(!routineList().length) return I18N.tr('共有できるデータがまだありません。');
   const L=['【毎日のタスク】共有データ','アプリの「タスク」→「今日と毎日」→「⋯」の取り込み欄に、この文章をそのまま貼り付けてください。',''];
   DOWS.forEach(d=>{
     const items=routinesOn(d).filter(r=>SUBJ[r.subject]);
     L.push(WD[d]+'曜日: '+(items.length?items.map(r=>{const tg=tagOf(r.subject),mm=rMemo(r,tg);return tl(tg)+(mm?' '+mm:'')+(r.min>0?'('+r.min+'分)':'');}).join('、'):'なし'));
   });
   L.push('','RTP1:'+encodeRoutines());
-  return L.join('\n');
+  return I18N.trText(L.join('\n'));
 }
 function routineImpPreview(text){
   if(!String(text||'').trim()) return '';
@@ -1888,6 +2308,52 @@ function playReward(o){
   requestAnimationFrame(spawn);
 }
 
+/* ---------- 通知 ---------- */
+let SWR=null;
+try{
+  if('serviceWorker' in navigator){
+    navigator.serviceWorker.register('sw.js').then(r=>{SWR=r;}).catch(()=>{});
+    navigator.serviceWorker.addEventListener('message',e=>{if(e.data&&e.data.act==='random') startRandomPending();});
+  }
+}catch(e){}
+function notifyOK(){try{return S.notify&&'Notification' in window&&Notification.permission==='granted';}catch(e){return false;}}
+function notify(title,body,tag,act){
+  if(!notifyOK()){toast(title);return;}
+  title=I18N.tr(title);body=I18N.tr(body);
+  const opt={body:body,tag:tag,data:{act:act||''}};
+  const fb=()=>{try{const n=new Notification(title,opt);n.onclick=()=>{try{window.focus();}catch(e){}n.close();if(act==='random')startRandomPending();};}catch(e){toast(title);}};
+  if(SWR&&SWR.showNotification) SWR.showNotification(title,opt).catch(fb); else fb();
+}
+function setNotify(on,after){
+  const done=()=>{saveStore();if(after)after();};
+  if(!on){S.notify=false;done();return;}
+  if(!('Notification' in window)){toast('このブラウザは通知に対応していません');S.notify=false;done();return;}
+  Notification.requestPermission().then(p=>{S.notify=(p==='granted');if(!S.notify)toast('通知が許可されませんでした');done();}).catch(()=>{S.notify=false;done();});
+}
+/* 通知を押したとき: 今日まだのタスクからランダムにタイマー開始 */
+function startRandomPending(){
+  const L=routinesOn(new Date().getDay()).filter(r=>SUBJ[r.subject]&&!routineState(r).done);
+  if(!L.length){toast('今日のタスクはぜんぶできています');return;}
+  if(S.timer.status!=='idle'){toast('いまのタイマーを終えてから選んでください');return;}
+  startRoutine(L[Math.floor(Math.random()*L.length)]);
+}
+let ntInit=false;
+function checkNotices(){
+  const now=new Date(), k=dkey(now.getTime()), silent=!ntInit; ntInit=true;
+  if(S.nf.d!==k) S.nf={d:k,goal:false,eve:false};
+  let dirty=false;
+  if(!S.sample&&!S.nf.goal&&todayMin()>=S.goalMin){
+    S.nf.goal=true;dirty=true;
+    if(!silent) notify('今日の目標を達成しました!',fmtMin(S.goalMin)+'の勉強、おつかれさまでした。','goal');
+  }
+  if(!S.nf.eve&&now.getHours()>=18&&!S.rsample&&S.timer.status==='idle'){
+    S.nf.eve=true;dirty=true;
+    const n=routinesOn(now.getDay()).filter(r=>SUBJ[r.subject]&&!routineState(r).done).length;
+    if(n>0) notify('今日のタスクがあと'+n+'件のこっています','1日が終わるまであと6時間。タップするとランダムでタイマーが始まります。','eve','random');
+  }
+  if(dirty) saveStore();
+}
+
 /* ---------- audio / wake lock ---------- */
 let audioCtx=null;
 function ensureAudio(){
@@ -2090,7 +2556,7 @@ function tagShareText(){
   SUBJECTS.forEach(t=>{const k=normName(t.subj||t.name);if(idx[k]==null){idx[k]=g.length;g.push({n:t.subj||t.name,list:[]});}g[idx[k]].list.push(t.name);});
   g.forEach(x=>L.push('■'+x.n+': '+x.list.join('、')));
   L.push('','TGS1:'+encodeTags());
-  return L.join('\n');
+  return I18N.trText(L.join('\n'));
 }
 function tagImpPreview(text){
   if(!String(text||'').trim()) return '';
@@ -2437,7 +2903,14 @@ function openManage(){
     const lim=h('label',{style:'display:flex;gap:10px;align-items:center;min-height:44px;font-size:14px'},
       h('input',{type:'checkbox',checked:S.limitAlert,style:'width:22px;height:22px;min-height:0;flex:none',on:{change:e=>{S.limitAlert=e.target.checked;saveStore();}}}),
       h('span',{text:'限界時間の1分前に、画面でおしらせする(音は出ません)'}));
-    return [goal,tags,lim];
+    const nt=h('label',{style:'display:flex;gap:10px;align-items:center;min-height:44px;font-size:14px'},
+      h('input',{type:'checkbox',checked:notifyOK(),style:'width:22px;height:22px;min-height:0;flex:none',on:{change:e=>{setNotify(e.target.checked,redraw);}}}),
+      h('span',{text:'通知を使う(限界時間・目標達成・夕方のリマインド)'}));
+    const langSel=h('div',{},h('div',{class:'shl','data-notr':'1',text:'Language / 言語'}),
+      h('div',{class:'seg',role:'group','data-notr':'1'},
+        h('button',{type:'button','aria-pressed':String(I18N.lang()==='ja'),on:{click:()=>applyLang('ja',true)}},'日本語'),
+        h('button',{type:'button','aria-pressed':String(I18N.lang()==='en'),on:{click:()=>applyLang('en',true)}},'English')));
+    return [langSel,goal,tags,lim,nt];
   });
 }
 
@@ -2454,7 +2927,7 @@ function heatCard(){
   const first=new Date(nd.getFullYear(),mo,1).getTime(), last=new Date(nd.getFullYear(),mo+1,0).getTime();
   const start=addDays(first,-((new Date(first).getDay()+6)%7));      /* 今月1日をふくむ週の月曜日 = いちばん上の段 */
   const weeks=Math.ceil((Math.round((last-start)/DAY)+1)/7);
-  const names=['月','火','水','木','金','土','日'];
+  const names=DOWS.map(d=>WD[d]);
   const grid=h('div',{class:'heat',role:'group','aria-label':(mo+1)+'月の学習時間'});
   grid.append(h('span',{class:'hl'}),...names.map(n=>h('span',{class:'hl',text:n})));
   for(let wk=0;wk<weeks;wk++){
@@ -2878,7 +3351,7 @@ function renderLog(){
     setTimeout(()=>{this.dataset.arm='0';this.textContent='記録をすべて消す';},3500);
   }}},'記録をすべて消す');
   const backup=h('div',{class:'card'},h('h2',{text:'バックアップ'}),
-    h('p',{class:'note',text:'記録は、いま使っているこの端末のブラウザに保存されます。端末を変えるときや、先生に見せるときは書き出してください。テスト分析の結果もJSONに入ります。'}),
+    h('p',{class:'note',text:'記録は、いま使っているこの端末のブラウザに保存されます。端末を変えるときは書き出してください。テスト分析の結果もJSONに入ります。'}),
     !S.storageOk?h('p',{class:'warn',text:'このブラウザでは保存できないため、ページを閉じると記録が消えます。'}):null,
     h('div',{class:'row',style:'margin-top:12px'},
       h('button',{type:'button',class:'btn sm',on:{click:()=>exportData('json')}},'書き出す(JSON)'),
@@ -2912,7 +3385,7 @@ function exportData(kind){
     name='manabilog-backup.json';
   }else{
     if(S.sample){toast('まだ自分の記録がありません');return;}
-    const rows=[['日付','開始時刻','教科','タスク','メモ','時間(分)','量','単位','集中度','ひとこと']];
+    const rows=[['日付','開始時刻','教科','タスク','メモ','時間(分)','量','単位','集中度','ひとこと'].map(x=>I18N.tr(x))];
     S.sessions.slice().sort((a,b)=>a.start-b.start).forEach(x=>{
       const d=new Date(x.start);
       rows.push([dkey(x.start),p2(d.getHours())+':'+p2(d.getMinutes()),tagOf(x.subject).subj||tagOf(x.subject).name,tagOf(x.subject).name,x.task,Math.round(x.min*10)/10,x.amount,x.unit,x.focus,x.note]);
@@ -3412,7 +3885,7 @@ function paintAlert(){
 }
 function checkLimit(){
   const t=S.timer;
-  if(t.status==='running'&&S.limitAlert&&T.limit&&T.al!==1&&T.al!==2&&elapsedMs()/60000>=T.limit.min-1){T.al=1;paintAlert();}
+  if(t.status==='running'&&S.limitAlert&&T.limit&&T.al!==1&&T.al!==2&&elapsedMs()/60000>=T.limit.min-1){T.al=1;paintAlert();const tg2=tagOf(t.subject);notify('そろそろ限界時間です',(tg2.subj||tg2.name)+'を5分休憩しませんか?','limit');}
 }
 
 function renderStats(){
@@ -3508,7 +3981,7 @@ function setTab(t){
 document.querySelectorAll('.tabbtn').forEach(b=>b.addEventListener('click',()=>setTab(b.dataset.tab)));
 
 /* ---------- ticking ---------- */
-function tick(){updateTimerUI();}
+function tick(){updateTimerUI();checkNotices();}
 setInterval(tick,250);
 document.addEventListener('visibilitychange',()=>{
   if(document.visibilityState==='visible'){tick(); if(S.timer.status==='running') lockScreen();}
@@ -3516,6 +3989,27 @@ document.addEventListener('visibilitychange',()=>{
 let rz=0;
 if(window.ResizeObserver){
   new ResizeObserver(()=>{cancelAnimationFrame(rz);rz=requestAnimationFrame(()=>{if(S.tab==='stats') drawAll(); else if(S.tab==='log') taDrawAll();});}).observe($('.wrap'));
+}
+
+/* ---------- 言語 ---------- */
+function applyLang(l,fromSettings){
+  I18N.setLang(l);
+  $('#todayLabel').textContent=dateLong(Date.now());
+  updateGamePill(); renderBanner(); setTab(S.tab);
+  if(fromSettings) openManage();
+}
+function langPicker(){
+  const wrap=h('div',{class:'sheetwrap','data-notr':'1',role:'dialog','aria-modal':'true','aria-label':'Language / 言語',style:'z-index:90'},
+    h('div',{class:'scrim',style:'background:rgba(10,16,15,.7)'}),
+    h('div',{class:'sheetp',style:'top:50%;bottom:auto;transform:translateY(-50%);border-radius:20px;max-width:420px;margin:0 auto;left:16px;right:16px'},
+      h('div',{style:'font:700 20px var(--f-disp);text-align:center;margin-bottom:6px',text:'Language / 言語'}),
+      h('p',{class:'note',style:'text-align:center;margin-bottom:16px',text:'言語をえらんでください / Choose your language'}),
+      h('div',{class:'rbtns'},
+        h('button',{type:'button',class:'btn pri',on:{click:()=>pick('ja')}},'日本語'),
+        h('button',{type:'button',class:'btn pri',on:{click:()=>pick('en')}},'English')),
+      h('p',{class:'note',style:'text-align:center;margin-top:12px',text:'あとから「タイマー」の「せってい」で変えられます / You can change it later in Timer → Settings'})));
+  function pick(l){wrap.remove();applyLang(l,false);}
+  document.body.append(wrap);
 }
 
 /* ---------- boot ---------- */
@@ -3527,6 +4021,8 @@ if(window.ResizeObserver){
   if(S.timer.status!=='idle'){FL.subj=groupKeyOf(S.timer.subject);FL.view='timer';}
   if(S.timer.status==='running') lockScreen();
   setTab('timer');
+  if(/[?&]act=random/.test(location.search)) startRandomPending();
+  if(!I18N.saved()) langPicker();
 })();
 })();
 </script>
