@@ -2324,9 +2324,30 @@ function notify(title,body,tag,act){
   const fb=()=>{try{const n=new Notification(title,opt);n.onclick=()=>{try{window.focus();}catch(e){}n.close();if(act==='random')startRandomPending();};}catch(e){toast(title);}};
   if(SWR&&SWR.showNotification) SWR.showNotification(title,opt).catch(fb); else fb();
 }
+/* 計測中の通知: 教科・タスク名と、今日の目標に対する進み具合(文字のバー)を、同じ通知のまま1分ごとに更新 */
+let tnLast=0,tnKey='',tnObj=null;
+function tnBar(p){const n=10,f=Math.round(Math.max(0,Math.min(1,p))*n);return '█'.repeat(f)+'░'.repeat(n-f);}
+function closeTimerNote(){
+  tnKey='';tnLast=0;
+  try{if(tnObj){tnObj.close();tnObj=null;}}catch(e){}
+  try{if(SWR&&SWR.getNotifications) SWR.getNotifications({tag:'timer'}).then(l=>l.forEach(n=>n.close())).catch(()=>{});}catch(e){}
+}
+function timerNotify(){
+  const t=S.timer;
+  if(!notifyOK()||t.status==='idle'){if(tnKey) closeTimerNote();return;}
+  const key=t.status+'|'+t.subject+'|'+t.task, now=Date.now();
+  if(key===tnKey&&now-tnLast<30000) return;
+  tnKey=key;tnLast=now;
+  const tg=tagOf(t.subject), tm=todayMin(), p=S.goalMin>0?tm/S.goalMin:0, paused=t.status==='paused';
+  const title=I18N.tr((paused?'⏸ ':'▶ ')+tl(tg)+(t.task&&normName(t.task)!==normName(tg.name)?'・'+t.task:''));
+  const body=I18N.tr(fmtClock(elapsedMs())+(paused?'(一時停止中)':'')+'\n'+tnBar(p)+' '+Math.round(p*100)+'%\n今日 '+fmtMin(tm)+' / 目標 '+fmtMin(S.goalMin));
+  const opt={body:body,tag:'timer',renotify:false,silent:true,requireInteraction:true,data:{act:''}};
+  const fb=()=>{try{if(tnObj)tnObj.close();tnObj=new Notification(title,opt);}catch(e){}};
+  if(SWR&&SWR.showNotification) SWR.showNotification(title,opt).catch(fb); else fb();
+}
 function setNotify(on,after){
   const done=()=>{saveStore();if(after)after();};
-  if(!on){S.notify=false;done();return;}
+  if(!on){S.notify=false;closeTimerNote();done();return;}
   if(!('Notification' in window)){toast('このブラウザは通知に対応していません');S.notify=false;done();return;}
   Notification.requestPermission().then(p=>{S.notify=(p==='granted');if(!S.notify)toast('通知が許可されませんでした');done();}).catch(()=>{S.notify=false;done();});
 }
@@ -2339,6 +2360,7 @@ function startRandomPending(){
 }
 let ntInit=false;
 function checkNotices(){
+  timerNotify();
   const now=new Date(), k=dkey(now.getTime()), silent=!ntInit; ntInit=true;
   if(S.nf.d!==k) S.nf={d:k,goal:false,eve:false};
   let dirty=false;
